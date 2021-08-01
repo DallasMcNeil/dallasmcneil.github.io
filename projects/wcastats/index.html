@@ -1,0 +1,46 @@
+---
+title: WCA Stats
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include head.html %}
+</head>
+<body>
+    
+{% include header.html %}
+
+{% include mainImage.html image="/images/headings/wcastats.jpeg" text="WCA Stats" %}
+
+<div class="container shadow">
+    <div class="row">
+        <div class="col-12 content">
+          <p>For our course, Grand Challenges in Computer Science, we were to conduct two projects exploring the visualisation of data. The data source(s) could be of our choice. The first project was to be a static poster which would be displayed. The second was a dynamic or interactive tool or website for a user to explore.</p>
+          <p>I chose to analyse the World Cubing Association (WCA) database which contains all competition details and records. In the static project I would showcase interesting totals and statistics about the community for a general audience to learn more about speedcubing. The interactive project would be a tool allowing cubers to explore competitor results, individually and as a whole.</p><br>
+          
+          <h2>Static Poster</h2>
+          <p>To analyse the WCA database, I used the R programming language. This was my first time using it and this proved to be an excellent learning opportunity. The graphics were produced in an SVG editor with the graphs specifically being done with R and Processing 3. Overall I'm happy with how it came together although I am concerned the statistics and data could be slightly incorrect due to my inexperience in this area.</p>
+
+          <br><img src="wcastats.png" class="content-image" alt="Poster"><br>
+
+          <p><a href="/projects/wcastats/wcastats.pdf">View the final PDF</a></p><br>
+          <h2>Interactive Tool</h2>
+          <p>For the interactive tool, I first used R to clean and format the data into an easily manageable CSV format which would be used with D3 in Javascript to produce the visualisations. The final webpage can produce a number of interesting graphs with many adjustable parameters. I am very happy with the overall outcome and the capabilities of this tool.</p>
+          <ul>
+              <li>Person Development for WCA ID, event, best/average. How has a competitor changed over time?</li>
+              <li>Community Distribution for event, year, best/average. What is the distribution of competitor times?</li>
+              <li>Community Animation for event, best/average. How have community distributions changed over time?</li>
+          </ul>
+
+          <br><img src="interactive.png" class="content-image" alt="Interactive"><br>
+
+          <p><a href="/downloads/WCA_Stats_Tool_2019.zip">Download the tool</a></p><br>
+          <p>An initial set of data as of July 19 2019 is included. Follow the instructions included to update the data yourself if you choose.</p> 
+        </div>
+    </div>
+</div>
+
+{% include footer.html %}
+
+</body>
+</html>

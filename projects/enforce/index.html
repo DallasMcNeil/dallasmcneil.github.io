@@ -1,0 +1,276 @@
+---
+title: Enforce
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <div class="notification">
+        This page is archived
+    </div>
+        
+    {% include head.html %}
+
+    <script src="/libraries/skrollr.min.js"></script>
+
+	<style>
+
+        p {
+            font-family: "helvetica","Open Sans",sans-serif;
+        }
+
+        body {
+            background-color: #000000;
+            max-height: 3600px;
+        }
+
+
+        #background {
+            display: block;
+            width: 100%;
+            height:100%;
+            top:0px;
+            left:0px;
+            right:0px;
+            position: fixed;
+            z-index: -2;
+            background-image:linear-gradient(0deg, hsl(180, 0%, 40%), hsl(216, 0%, 10%));
+            /*background-color: #FFFFFF;
+            background: rgba(26,26,26,1);
+            background: -moz-linear-gradient(top, rgba(26,26,26,1) 0%, rgba(102,102,102,1) 100%);
+            background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(26,26,26,1)), color-stop(100%, rgba(102,102,102,1)));
+            background: -webkit-linear-gradient(top, rgba(26,26,26,1) 0%, rgba(102,102,102,1) 100%);
+            background: -o-linear-gradient(top, rgba(26,26,26,1) 0%, rgba(102,102,102,1) 100%);
+            background: -ms-linear-gradient(top, rgba(26,26,26,1) 0%, rgba(102,102,102,1) 100%);
+            background: linear-gradient(to bottom, rgba(26,26,26,1) 0%, rgba(102,102,102,1) 100%);
+            filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1a1a1a', endColorstr='#666666', GradientType=0 );*/
+        }
+
+        .noise {
+            display: block;
+            width: 100%;
+            height:100%;
+            top:0px;
+            left:0px;
+            right:0px;
+            position: fixed;
+            z-index: -1;
+            opacity: 0.5;
+            background-image: url("assets/Noise.png");
+            background-repeat:repeat;
+        }
+
+        #logo {
+            width: 600px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 200px;
+        }
+
+        #devTitle {
+            color: #FFFFFF;
+            font-family: "helvetica-light","Open Sans",sans-serif;
+            font-weight: 300;
+            font-size: 30px;
+            position: relative;
+            margin-top: 20px;
+            margin-bottom:30px;
+            text-align: center;
+
+        }
+
+        .table {
+            width:900px;
+            display: block;
+            margin-top:100px;
+            margin-bottom:100px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .tableRow {
+            margin-top: 100px;
+            width:900px;
+            margin-bottom: 100px;
+        }
+        
+        .infoTableA {
+            width:550px;
+        }
+        
+        .infoTableB {
+            width:550px;
+            text-align: right;
+        }
+        
+        .imageTable {
+            width:350px;
+        }
+        
+        .image {
+            width: 300px;
+            -webkit-box-shadow: 0px 10px 20px 0px rgba(0,0,0,0.75);
+-moz-box-shadow: 0px 10px 20px 0px rgba(0,0,0,0.75);
+box-shadow: 0px 10px 20px 0px rgba(0,0,0,0.75);
+        }
+
+        .info {
+            font-family: "helvetica","Open Sans",sans-serif;
+            font-size: 40px;
+        }
+
+        .description {
+            margin-top:100px;
+            margin-bottom:50px;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+            font-family: "helvetica","Open Sans",sans-serif;
+            font-size: 40px;
+            width:900px;
+        }
+        
+        #video {
+            display: block;
+            
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 50px;
+            margin-bottom: 100px;
+            -webkit-box-shadow: 0px 10px 20px 0px rgba(0,0,0,0.75);
+            -moz-box-shadow: 0px 10px 20px 0px rgba(0,0,0,0.75);
+            box-shadow: 0px 10px 20px 0px rgba(0,0,0,0.75);
+        }
+        
+        #video:hover {
+            cursor:pointer;
+        }
+
+        #contact {
+            font-size: 30px;
+            font-family: "helvetica","Open Sans",sans-serif;
+            text-align: center;
+            color: #FFFFFF;
+        }
+        
+        .download {
+            margin-top:10px;
+            margin-bottom:50px;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+            font-family: "helvetica-bold","Open Sans";
+            font-weight: 700;
+            font-size: 40px;
+            width:900px;
+        }
+        
+        .download:hover {    
+            text-decoration: underline;
+        }
+
+	</style>
+</head>
+<body>
+    
+{% include header.html %}
+
+<div id="background"
+data-anchor-target="#background"
+           data-start="background-image[swing]:linear-gradient(90deg, rgb(102,102,102), rgb(25,25,25));"
+           data-350-start="background-image[swing]:linear-gradient(90deg, rgb(102,102,102), rgb(25,25,25));"
+           data-880-start="background-image[swing]:linear-gradient(90deg, rgb(0,255,255), rgb(0,102,255));" 
+           data-1200-start="background-image[swing]:linear-gradient(90deg, rgb(204,255,0), rgb(255,153,0));"
+           data-1760-start="background-image[swing]:linear-gradient(90deg, rgb(255,0,0), rgb(255,0,153));"
+           data-2250-start="background-image[swing]:linear-gradient(90deg, rgb(0,170,255), rgb(0,32,255));"
+           data-2740-start="background-image[swing]:linear-gradient(90deg, rgb(0,255,0), rgb(0,255,153));"
+           data-3230-start="background-image[swing]:linear-gradient(90deg, rgb(255,0,0), rgb(255,153,0));"
+
+></div>
+<div class="noise"></div>
+
+<img id="logo" src="assets/ENFORCE.png" alt="Image couldn't be loaded" align="middle">
+
+<p id="devTitle">
+  Created By Dallas McNeil
+</p>
+
+<a href="/downloads/ENFORCE.zip" target="_blank"><p class="download">Download for MacOS</p></a>
+<video id="video" width="850" controls poster="assets/Poster.png">
+   <source src="assets/Preview.mp4" type="video/mp4">
+</video>
+
+<p class="description">
+ENFORCE is an abstract physics puzzle game where an Orb is moved to an End Point using Force Fields. Manipulate Fields to navigate the Orb around countless obstacles and challenges in 60 demanding levels.Try solutions and adjust Fields to create interesting and unique results to complete challenging objectives.
+</p>
+
+<table class="table">
+   <tr class="tableRow">
+       <td><div class="imageTable"><img class="image" src="assets/Screenshot5.png"></div></td>
+       <td><div class="infoTable"><p class="info">
+           60 difficult Levels with interesting and varying gameplay
+           </p></div></td>
+   </tr>
+</table>
+<table class="table">
+   <tr class="tableRow">
+       <td><div class="infoTableB"><p class="info">
+           Multiple challenges per level with unique solutions
+
+           </p></div></td>
+       <td><div class="imageTable"><img class="image" src="assets/Screenshot1.png"></div></td>
+   </tr>
+</table>
+<table class="table">
+   <tr class="tableRow">
+       <td><div class="imageTable"><img class="image" src="assets/Screenshot4.png"></div></td>
+       <td><div class="infoTable"><p class="info">
+           Colourful and stylised graphics with a progressive electronic soundtrack
+           </p></div></td>
+   </tr>
+</table>
+   <table class="table">
+   <tr class="tableRow">
+       <td><div class="infoTableB"><p class="info">
+           Record and share your solutions with friends on iOS
+           </p></div></td>
+       <td><div class="imageTable"><img class="image" src="assets/Screenshot2.png"></div></td>
+   </tr>
+</table>
+<table class="table">
+   <tr class="tableRow">
+       <td><div class="imageTable"><img class="image" src="assets/Screenshot3.png"></div></td>
+       <td><div class="infoTable"><p class="info">
+           Game Center Achievements and challenges
+           </p></div></td>
+   </tr>
+</table>
+
+<p id="devTitle">
+   Note: ENFORCE is not longer available on iOS.
+</p>
+
+{% include footer.html %}
+
+<script>
+    window.onload = function() {  
+       var s = skrollr.init([
+       smoothScrolling = true
+       ])  
+       if (s.isMobile()) {
+           s.destroy()        
+       }
+    }
+    
+    var video = document.getElementById("video")
+    video.onclick=function(){
+       if (video.paused) {
+           video.play()
+       } else {
+           video.pause()
+       }
+    };
+</script>
+
+</body>
+</html>

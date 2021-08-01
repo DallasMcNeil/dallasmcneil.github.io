@@ -1,0 +1,35 @@
+---
+title: Projects
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include head.html %}
+</head>
+
+<body>
+
+    {% include header.html %}
+
+    {% include mainImage.html image="/images/headings/grid.jpeg" logo="/images/logo/logo-1024.png" text="Projects" %}
+ 
+    {% for yearGroup in (2010..2050) reversed %}
+        {% assign yearProjects = site.projects | where: 'year', yearGroup | sort: 'importance' | reverse %}
+        {% if yearProjects != empty %}
+        <div class="container project-group">
+            <div class="row">
+                <div class="col-12">
+                    <h2>{{ yearGroup }}</h2>
+                </div>
+            </div>
+            {% for project in yearProjects %}
+                {% include project.html title=project.title image=project.image content=project.content badges=project.badges %}
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endfor %}
+
+    {% include footer.html %}
+
+  </body>
+</html>

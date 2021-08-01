@@ -1,0 +1,51 @@
+---
+title: Home
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include head.html %}
+</head>
+
+<body>
+
+    {% include header.html %}
+
+    {% include mainImage.html image="/images/headings/grid.jpeg" logo="/images/logo/logo-1024.png" text="Dallas McNeil<br>Software Developer" %}
+
+    <!-- Content -->
+    <div class="container mb-4">
+      <div class="row">
+        <div class="col-12">
+          <p class="introduction">
+            Computer Graphics<br>
+            CPU Architecture Security<br>
+            Speedcubing<br>
+          </p>
+        </div>
+      </div>
+    </div>
+  
+    <div class="container project-group">
+        <div class="row">
+            <div class="col-12">
+                <h2>Projects</h2>
+            </div>
+        </div>
+
+        {% assign mainProjects = site.projects | where: 'mainProject', true | sort: 'importance' | reverse %}
+        {% for project in mainProjects %}
+            {% include project.html title=project.title image=project.image content=project.content badges=project.badges %}
+        {% endfor %}
+
+      <div class="row">
+        <div class="col-12">
+          <a href="/projects/index.html"><h3>See more</h3></a>
+        </div>
+      </div>
+    </div>
+
+    {% include footer.html %}
+
+  </body>
+</html>

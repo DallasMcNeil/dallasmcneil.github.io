@@ -1,0 +1,156 @@
+---
+title: Letter Pairs
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include head.html %}
+
+    <style>
+        body {
+            background: #202020;
+        }
+        
+        p {
+            font-size:16px;
+        }
+        
+        #letters {
+            color:#F0F0F0;
+            position:fixed;
+            top:40vh;
+            width:100vw;
+            height:20vh;
+            line-height: 20vh;
+            vertical-align: middle;
+            display:block;
+            font-size:20vh;
+            text-align: center;
+        }
+        
+        #position {
+            color:#F0F0F0;
+            position:fixed;
+            top:65vh;
+            width:100vw;
+            height:8vh;
+            line-height: 8vh;
+            vertical-align: middle;
+            display:block;
+            font-size:8vh;
+            text-align: center;
+        }
+    </style>
+    
+    <title>
+        Letter Pairs | Dallas McNeil
+    </title>
+</head>
+<body>
+    {% include header.html %}
+
+    <div id="content" style="margin:20px;margin-top:60px;">
+        <p>Letters: <input type="text" id="letterInput" style="width:300px;"><button onclick="AXCharacters()">A-X</button><button onclick="AZCharacters()">A-Z</button></p>
+        <p><input id="sameLetters" type="checkbox"> Same letter pairs</p>
+        <button onclick="generate()">Generate</button><button onclick="previous()">Previous</button><button onclick="next()">Next</button>
+        <p id="position"></p>
+        <p id="letters"></p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+
+    <script> 
+        
+        Array.prototype.shuffle = function () {
+            var n = this.length;
+
+            for (var i = n - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var tmp = this[i];
+                this[i] = this[j];
+                this[j] = tmp;
+            }
+        }
+        
+        window.onkeydown = function(e) {
+            if (e.key === " " || e.key === "ArrowRight") {
+                next();
+            } else if (e.key === "ArrowLeft") {
+                previous();
+            }
+        }
+        
+        var sameLetters = document.getElementById("sameLetters");
+        var position = document.getElementById("position");
+        var letters = document.getElementById("letters");
+        var letterInput = document.getElementById("letterInput");
+        
+        var index = 0;
+        var pairs = [];
+        
+        function generate() {
+            pairs = [];
+            index = 0;
+            if (letterInput.value.length < 2) {
+                pairs = ["_ _"];
+            } else {
+                var characters = "";
+                dup: for (var i = 0; i < letterInput.value.length; i++) {
+                    for (var c = 0; c < characters.length; c++) {
+                        if (letterInput.value[i] === characters[c] || letterInput.value[i] === " ") {
+                            continue dup;
+                        }
+                    }
+                    characters += letterInput.value[i];
+                }
+                
+                if (characters.length < 2) {
+                    pairs = ["_ _"];
+                    showPair();
+                    return;
+                }
+                
+                for (var a = 0; a < characters.length; a++) {
+                    for (var b = 0; b < characters.length; b++) {
+                        if (characters[a] != characters[b] || sameLetters.checked) {
+                            pairs.push(characters[a] + " " + characters[b]);
+                        }
+                    }   
+                }
+                pairs.shuffle();
+            }
+            showPair();
+        }
+        
+        function previous() {
+            index = (index - 1) % pairs.length;
+            if (index < 0) {
+                index += pairs.length;
+            }
+            showPair();
+        }
+        
+        function next() {
+            index = (index + 1) % pairs.length;
+            showPair();
+        }
+        
+        function showPair() {
+            position.innerHTML = (index + 1) + " / " + pairs.length;
+            letters.innerHTML = pairs[index];
+        }
+        
+        function AXCharacters() {
+            letterInput.value = "ABCDEFGHIJKLMNOPQRSTUVWX";
+        }
+        
+        function AZCharacters() {
+            letterInput.value = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        }
+        
+        AXCharacters();
+        generate();
+    </script>
+</body>
+</html>

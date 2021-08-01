@@ -1,0 +1,18 @@
+<div class="jumbotron main-image d-flex align-items-center shadow-lg" style="background-image: linear-gradient( rgba(0,0,0,.5), rgba(0,0,0,.5) ), url('{{ include.image }}') !important; ">
+    <div class="container">
+        <div class="row">
+            {% if include.logo != nil %}
+            <div class="col-12 col-lg-5">
+                <img class="image-fluid mx-auto d-block float-none float-lg-right" src="{{ include.logo }}" width="256" height="256">
+            </div>
+            <div class="d-block my-auto col-12 col-lg-7">
+                <h1 class="text-center text-lg-left">{{ include.text }}</h1>
+            </div>
+            {% else %}
+            <div class="d-block my-auto col-12">
+                <h1 class="text-center">{{ include.text }}</h1>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

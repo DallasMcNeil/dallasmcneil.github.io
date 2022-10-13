@@ -1,9 +1,9 @@
 <div class="row project shadow">
     <div class="col-12 col-lg-5 project-image-col">
-        <img class="image-fluid w-100" src="{{ include.image }}">
+        <a href="{{ include.link }}"><img class="image-fluid w-100" src="{{ include.image }}"></a>
     </div>
     <div class="col-12 col-lg-7 project-text-col">
-      <h3>{{ include.title }}</h3>
+      <h3><a class="project-text-link" href="{{ include.link }}">{{ include.title }}</a></h3>
         <h5>
             {{ include.badges }}
         </h5>

@@ -26,6 +26,11 @@ $primary: #2490FF;
   padding-bottom:5px;
 }
 
+.project-text-link, .project-text-link:hover
+{
+  color: inherit;
+}
+
 .project
 {
   margin-bottom:30px;  
@@ -100,7 +105,7 @@ h3
 }
 
 // Bootstrap and its default variables
-@import "scss/bootstrap";
+@import "../../node_modules/bootstrap/scss/bootstrap";
 
 .navbar
 {

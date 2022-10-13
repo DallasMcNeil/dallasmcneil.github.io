@@ -23,7 +23,7 @@ title: Projects
                 </div>
             </div>
             {% for project in yearProjects %}
-                {% include project.html title=project.title image=project.image content=project.content badges=project.badges %}
+                {% include project.html title=project.title image=project.image content=project.content badges=project.badges link=project.link %}
             {% endfor %}
         </div>
         {% endif %}

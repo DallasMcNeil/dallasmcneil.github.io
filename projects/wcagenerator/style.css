@@ -1,0 +1,32 @@
+
+/* Documents */
+
+#print-document {
+    margin: 0mm 0mm 0mm 0mm;
+    padding: 0mm 0mm 0mm 0mm;
+}
+
+/* Page classes */
+
+.print-page {
+    position: relative;
+    margin: 0mm 0mm 0mm 0mm;
+    padding: 0mm 0mm 0mm 0mm;
+}
+
+/* Badge classes */
+
+.print-badge {
+    position: absolute;
+    top: 0cm;
+    left: 0cm;
+    margin: 0mm 0mm 0mm 0mm;
+    padding: 0mm 0mm 0mm 0mm;
+}
+
+.wca-name {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 2cm;
+    font-weight: 100;
+}
+

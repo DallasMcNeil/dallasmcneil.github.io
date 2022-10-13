@@ -1,0 +1,76 @@
+<style id="badge-template-style">
+    .badge {
+        border: 0.25mm dotted#B0B0B0;
+        margin: -0.25mm;
+        background-image: url("./images/badge-a4-3x3-default.png");
+        background-size: 100% auto;
+        background-repeat: no-repeat;
+    }
+
+    .name {
+        position: absolute;
+        margin-left: auto;
+        margin-right: auto;
+        left: 0;
+        right: 0;
+        text-align: center;
+        bottom: 1.1cm;
+
+        font-family: Arial, sans-serif;
+        line-height: 0.65cm;
+        font-size: 0.65cm;
+        font-weight: 700;
+    }
+
+    .id {
+        position: absolute;
+        margin-left: auto;
+        margin-right: auto;
+        left: 0;
+        right: 0;
+        text-align: center;
+        bottom: 0.5cm;
+
+        font-family: Arial, sans-serif;
+        line-height: 0.5cm;
+        font-size: 0.5cm;
+        font-weight: 400;
+    }
+
+    .line {
+        position: absolute;
+        width: 6cm;
+        bottom: 1.4cm;
+        margin-left: auto;
+        margin-right: auto;
+        left: 0;
+        right: 0;
+    }
+
+    .wca-image {
+        position: absolute;
+        bottom: 0.3cm;
+        left: 0.5cm;
+        height: 1.1cm;
+        width: auto;
+    }
+
+    .sca-image {
+        position: absolute;
+        bottom: 0.3cm;
+        right: 0.5cm;
+        height: 1.1cm;
+        width: auto;
+    }
+
+</style>
+
+<div id="badge-template">
+    <div class="print-badge badge">
+        <hr size="1mm" color="black" class="line"/>
+        <p class="wca-name name">Name</p>
+        <p class="wca-id id">WCAID</p>
+        <img class="sca-image" src="./images/sca.png"/>
+        <img class="wca-image" src="./images/wca.png">
+    </div>
+</div>

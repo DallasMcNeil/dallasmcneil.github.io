@@ -11,20 +11,7 @@ title: Home
 
     {% include header.html %}
 
-    {% include mainImage.html image="/images/headings/grid.jpeg" logo="/images/logo/logo-1024.png" text="Dallas McNeil<br>Software Developer" %}
-
-    <!-- Content -->
-    <div class="container mb-4">
-      <div class="row">
-        <div class="col-12">
-          <p class="introduction">
-            Computer Graphics<br>
-            CPU Architecture Security<br>
-            Speedcubing<br>
-          </p>
-        </div>
-      </div>
-    </div>
+    {% include mainImage.html image="/images/headings/grid.jpeg" logo="/images/logo/logo-1024.png" text="Dallas McNeil<br>Software Engineer<br>Speedcuber" %}
   
     <div class="container project-group">
         <div class="row">
@@ -35,7 +22,7 @@ title: Home
 
         {% assign mainProjects = site.projects | where: 'mainProject', true | sort: 'importance' | reverse %}
         {% for project in mainProjects %}
-            {% include project.html title=project.title image=project.image content=project.content badges=project.badges %}
+            {% include project.html title=project.title image=project.image content=project.content badges=project.badges link=project.link %}
         {% endfor %}
 
       <div class="row">

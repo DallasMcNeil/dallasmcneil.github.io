@@ -8,18 +8,20 @@
         position:absolute;
         left:0mm;
         top:0mm;
-        width:14.85cm;
-        height:21cm;
-        border-right: 0.75mm dotted#B0B0B0;
-        margin-right: -0.75mm;
-        background-image: url("./images/badge-a6-book-default.png");
+        height:14.85cm;
+        width:21cm;
+        border-bottom: 0.75mm dotted#B0B0B0;
+        margin-bottom: -0.75mm;
+        background-image: url("./images/badge-a4-3x3-default.png");
         background-size: 100% auto;
         background-repeat: no-repeat;
+        transform-origin: 0% 0%;
+        transform:rotate(90deg) translate(0cm, -29.7cm);
     }
 
     .schedule-half {
         position:absolute;
-        right:0mm;
+        left:0mm;
         top:0mm;
         width:14.85cm;
         height:21cm;
@@ -32,10 +34,11 @@
         left: 0;
         right: 0;
         text-align: center;
-        bottom: 3.2cm;
+        bottom: 2.1cm;
+        width: 13.85cm;
 
         font-family: Arial, sans-serif;
-        font-size: 1.5cm;
+        font-size: 1.2cm;
         font-weight: 700;
         word-wrap: break-word;
     }
@@ -47,17 +50,28 @@
         left: 0;
         right: 0;
         text-align: center;
-        bottom: 2.0cm; 
+        bottom: 1.0cm;
 
         font-family: Arial, sans-serif;
-        font-size: 1.1cm;
+        font-size: 1.0cm;
         font-weight: 400;
     }
 
     .line {
         position: absolute;
         width: 12cm;
-        bottom: 4.2cm;
+        bottom: 3.0cm;
+        margin-left: auto;
+        margin-right: auto;
+        left: 0;
+        right: 0;
+    }
+
+    .country {
+        position: absolute;
+        height: 1cm;
+        width: auto;
+        bottom: 0.8cm;
         margin-left: auto;
         margin-right: auto;
         left: 0;
@@ -138,18 +152,19 @@
 
 <div id="badge-template">
     <div class="print-badge badge">
-        <div class="name-half">
-            <hr size="2mm" color="black" class="line"/>
-            <p class="wca-name name">Name</p>
-            <p class="wca-id id">WCAID</p>
-            <img class="sca-image" src="./images/sca.png"/>
-            <img class="wca-image" src="./images/wca.png">       
-        </div>
         <div class="schedule-half">
             <p class="wca-name name-back">Name</p>
             <p class="wca-comp-id comp-id">0</p>
             <table class="wca-schedule" cellspacing="0">
             </table>
+        </div>
+        <div class="name-half">
+            <hr size="2mm" color="black" class="line"/>
+            <p class="wca-name name">Name</p>
+            <p class="wca-id id">WCAID</p>
+            <img class="sca-image" src="./images/sca.png"/>
+            <img class="wca-image" src="./images/wca.png"> 
+            <img class="wca-country country" src="https://flagcdn.com/h80/au.png">      
         </div>
     </div>
 </div>

@@ -1,9 +1,5 @@
 
-var wcif = undefined
-var activities = {}
-var backgroundImage = ""
-
-var weekDaysText = [
+var weekDaysMap = [
     "Sunday", 
     "Monday", 
     "Tuesday", 
@@ -13,7 +9,7 @@ var weekDaysText = [
     "Saturday", 
 ]
 
-var eventText = {
+var eventMap = {
     "222": "2x2x2",
     "333": "3x3x3",
     "333fm": "Fewest Moves",
@@ -34,6 +30,13 @@ var eventText = {
     "skewb": "Skewb",
 }
 
+// Various badge settings
+// Important classes
+// .wca-id (p): Competitor ID is inserted into element
+// .wca-name (p): Competitor Name is inserted into element
+// .wca-country (img): Competitor country flag is set as the source of the image
+// .wca-schedule (table): Competitor schedule is built into table
+// .wca-comp-id (p): Competitor competition ID is inserted into element
 var badgeTemplates = [
     {
         name: "SCA Basic 3x3",
@@ -49,7 +52,7 @@ var badgeTemplates = [
     },
     {
         name: "SCA Book",
-        description: "Individual badge and schedule for printing on a single landscape A6 page",
+        description: "Individual portrait badge and schedule for printing on a single landscape A6 page",
         link: "./templates/SCA-book.html",
         pageWidth: 29.7,
         pageHeight: 20.9818,
@@ -61,8 +64,32 @@ var badgeTemplates = [
     },
     {
         name: "SCA Book 2x2",
-        description: "2 rows of 2 columns of badges and schedule for printing on a landscape A4 page",
+        description: "2 rows of 2 columns of portrait badges and schedule for printing on a landscape A4 page",
         link: "./templates/SCA-book.html",
+        pageWidth: 29.7,
+        pageHeight: 20.9818,
+        pageRows: 2,
+        pageColumns: 2,
+        badgeWidth: 29.7,
+        badgeHeight: 20.9818,
+        badgeScale: 0.5,
+    },
+    {
+        name: "SCA Landscape Book",
+        description: "Individual landscape badge and schedule for printing on a single landscape A6 page",
+        link: "./templates/SCA-book-landscape.html",
+        pageWidth: 29.7,
+        pageHeight: 20.9818,
+        pageRows: 1,
+        pageColumns: 1,
+        badgeWidth: 29.7,
+        badgeHeight: 20.9818,
+        badgeScale: 1.0,
+    },
+    {
+        name: "SCA Landscape Book 2x2",
+        description: "2 rows of 2 columns of landscape badges and schedule for printing on a landscape A4 page",
+        link: "./templates/SCA-book-landscape.html",
         pageWidth: 29.7,
         pageHeight: 20.9818,
         pageRows: 2,
@@ -73,26 +100,60 @@ var badgeTemplates = [
     }
 ]
 
+// Settings
 var settings = {
     template: 0,
-    customTemplate: false,
     marginPercentage: 0.05,
 } 
 
-function fitText(nameElem, lines) {
-    var height = nameElem.height();
-    var maxHeight = parseInt(nameElem.css("font-size"), 10) * lines;
-    while (maxHeight < height) {
-        size = parseInt(nameElem.css("font-size"), 10);
-        nameElem.css("font-size", size - 1);
-        height = nameElem.height();
+// Data storage
 
-        var bottom = parseInt(nameElem.css("bottom"), 10);
-        nameElem.css("bottom", bottom + 1);
+// The core WCIF file with all competition information
+var wcif = undefined
+// All child activities by activityId 
+var activities = {}
+// Raw background image data for name badges
+var backgroundImage = ""
+
+// Shrink a text element until it's overall height is
+// within 'lines' number of lines tall with the initial font size
+function fitText(textElem, lines) {
+    // Get height and maximum height allowed
+    var height = textElem.height();
+    var maxHeight = parseInt(textElem.css("font-size"), 10) * lines;
+
+    // If too tall, reduce font size until it fits
+    while (maxHeight < height) {
+        size = parseInt(textElem.css("font-size"), 10);
+        textElem.css("font-size", size - 1);
+        height = textElem.height();
+
+        // Adjust position
+        // Assumed font is positioned relative to bottom
+        var bottom = parseInt(textElem.css("bottom"), 10);
+        textElem.css("bottom", bottom + 1);
     }
 }
 
+const STATUS_MODE_INFO = 0;
+const STATUS_MODE_WARN = 1;
+const STATUS_MODE_ERROR = 2;
+function setStatus(text, mode) {
+    $("#status").removeClass();
+    $("#status").text(text);
+    if (mode == STATUS_MODE_WARN) {
+        $("#status").addClass("warn");
+    } else if (mode == STATUS_MODE_ERROR) {
+        $("#status").addClass("error");
+    } else {
+        $("#status").addClass("info");
+    }
+}
+
+// Load a WCIF file from the user
 function readWCIF(input) {
+
+    // Get file
     let file = input.files[0]; 
     let fileReader = new FileReader(); 
     fileReader.readAsText(file); 
@@ -210,19 +271,18 @@ function generate() {
             badge.removeAttr("id");
             badge.show();
             if (index >= persons.length) {
-                badge.find(".wca-name").first().text(" ");
-                badge.find(".wca-id").first().text(" ");
+                badge.find(".wca-name").text(" ");
+                badge.find(".wca-id").text(" ");
+                badge.find(".wca-comp-id").text("-");
+                badge.find(".wca-country").attr("src", "");
             } else {
-                badge.find(".wca-name").first().text(persons[index].name);
-                badge.find(".wca-id").first().text(persons[index].wcaId);
+                badge.find(".wca-name").text(persons[index].name);
+                badge.find(".wca-id").text(persons[index].wcaId);
+                badge.find(".wca-comp-id").text(`${persons[index].registrantId}`);
+                badge.find(".wca-country").attr("src", `https://flagcdn.com/h80/${persons[index].countryIso2.toLowerCase()}.png`);
             }
             badge.css("top", `${(Math.floor(badgeIndex / template.pageColumns)) * template.badgeHeight * template.badgeScale}cm`)
             badge.css("left", `${(badgeIndex % template.pageRows) * template.badgeWidth * template.badgeScale}cm`)
-
-            var page = doc.find(".print-page").last();
-            page.append(badge);
-
-            fitText(badge.find(".wca-name").first(), 2);
     
             var personalSchedule = {}
             if (index >= persons.length) {
@@ -256,7 +316,7 @@ function generate() {
                                 timeText: `${startTime.format("HH:mm")} - ${endTime.format("HH:mm")}`,
                                 sortTime: startTime.unix(),
                                 eventCode: event,
-                                eventText: eventText[event],
+                                eventText: eventMap[event],
                                 competing: -1,
                                 judging: [],
                             };
@@ -308,10 +368,10 @@ function generate() {
                 //console.log(sortedSchedule)
 
                 var table = badge.find(".wca-schedule").first();
-                var tableContent = "";
-                tableContent += "<tr><td>Time</td><td>Event</td><td>Group</td><td>Roles</td></tr>";
+                var tableContent = "<tbody>";
+                tableContent += "<tr><td>Time</td><td>Event</td><td>Group</td><td>Staff</td></tr>";
                 for (var i=0; i<sortedSchedule.length; i++) {   
-                    tableContent += `<tr><td colspan="4" class="wca-schedule-header">${ weekDaysText[sortedSchedule[i].day]}</td></tr>`
+                    tableContent += `<tr><td colspan="4" class="wca-schedule-header">${ weekDaysMap[sortedSchedule[i].day]}</td></tr>`
                     for (var j=0; j<sortedSchedule[i].sortedAssignments.length; j++) {   
                         var assignment = sortedSchedule[i].sortedAssignments[j];
 
@@ -332,50 +392,90 @@ function generate() {
                         tableContent += `<tr><td>${assignment.timeText}</td><td>${eventIcon} ${assignment.eventText}</td><td>${assignment.competing}</td><td>${roleText}</td></tr>`;
                     }
                 }
+                tableContent += "</tbody>";
                 table.append(tableContent);
             }
+
+            var page = doc.find(".print-page").last();
+            page.append(badge);
 
             badgeIndex+=1;
             index+=1;
         }
 
+        $("#print-button").prop("disabled", false);
+
+        preview();
+        $("#document-preview").css("height", $("#document-preview").innerWidth() * (template.pageHeight / template.pageWidth));
+        
     });
+}
+
+function preview() {
+
+    var headHtml = ""
+    headHtml += '<link rel="stylesheet" type="text/css" href="./style.css">';
+    headHtml += '<link rel="stylesheet" type="text/css" href="./cubingIcons.css">';
+    headHtml += '<link rel="stylesheet" type="text/css" href="./print.css">';
+
+    var bodyHtml = ""
+    bodyHtml += $("#badge-template-style").prop('outerHTML')
+    if ($("#background-image-style").prop('outerHTML') != undefined) {
+        bodyHtml += $("#background-image-style").prop('outerHTML');
+    }
+
+    $("#print-document").show();
+    bodyHtml += $("#print-document").prop('outerHTML');
+    $("#print-document").hide();
+
+    bodyHtml += '<script src="./jquery.min.js"></script>';
+    bodyHtml += '<script src="./document.js"></script>';
+    bodyHtml += '<script>$(document).ready(function () { fixNameText() });</script>';
+
+    $('#document-preview').contents().find('head').html(headHtml)
+    $('#document-preview').contents().find('body').html(bodyHtml)
+    $('#document-preview').show();
 }
 
 function print() {
     var printwin = window.open("");
 
     printwin.document.open();
-    printwin.document.write('<html><head><link rel="stylesheet" type="text/css" href="./style.css"></head><body>');
-    printwin.document.write('<html><head><link rel="stylesheet" type="text/css" href="./cubingIcons.css"></head><body>');
-    printwin.document.write('<html><head><link rel="stylesheet" type="text/css" href="./print.css"></head><body>');
+    printwin.document.write('<html><head><link rel="stylesheet" type="text/css" href="./style.css">');
+    printwin.document.write('<link rel="stylesheet" type="text/css" href="./cubingIcons.css">');
+    printwin.document.write('<link rel="stylesheet" type="text/css" href="./print.css"></head><body>');
     printwin.document.write($("#badge-template-style").prop('outerHTML'));
     if ($("#background-image-style").prop('outerHTML') != undefined) {
         printwin.document.write($("#background-image-style").prop('outerHTML'));
     }
+    $("#print-document").show();
     printwin.document.write($("#print-document").prop('outerHTML'));
+    $("#print-document").hide();
+
+    printwin.document.write('<script src="./jquery.min.js"></script>');
+    printwin.document.write('<script src="./document.js"></script>');
+    printwin.document.write('<script>$(document).ready(function () { fixNameText(); window.print(); window.stop(); window.close(); });</script>');
     printwin.document.write('</body></html>');
     printwin.document.close();
-
-    setTimeout(function() {
-        printwin.print();
-        printwin.stop();
-        printwin.close();
-    }, 1000);
 }
 
-// Set badge dropdown
-var option = '';
-for (var i=0;i<badgeTemplates.length;i++){
-   option += '<option value="' + i + '">' + badgeTemplates[i].name + '</option>';
-}
-$('#select-template').html(option);
-$('#select-template').val(String(settings.template));
-$('#select-template').on('change', function() {
-    settings.template = Number(this.value);
+$(document).ready(function () {
+    // Setup template dropdown
+    var option = '';
+    for (var i=0;i<badgeTemplates.length;i++){
+       option += '<option value="' + i + '">' + badgeTemplates[i].name + '</option>';
+    }
+    $('#select-template').html(option);
+    $('#select-template').val(String(settings.template));
+    $('#select-template').on('change', function() {
+        settings.template = Number(this.value);
+    });
+
+    $("#document-preview").hide();
+    $("#print-document").hide();
+
+    // Only tested to work on chromium web browsers
+    if (navigator.userAgent.indexOf('Chrome') == -1) {
+        alert("Printing has only been tested on Google Chrome and Microsoft Edge. I highly recommend you use either or your final printout may be incorrect")
+    }
 });
-
-setTimeout(function() {
-    
-}, 1000);
-

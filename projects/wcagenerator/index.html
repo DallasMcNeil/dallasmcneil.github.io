@@ -1,26 +1,61 @@
+---
+title: WCA Name Badge Generator 
+---
 <!DOCTYPE html>	
 <head>
-    <title>WCA Name Badge Generator</title>
+    {% include head.html %}
+    
     <link rel="stylesheet" type="text/css" href="./style.css">
     <link rel="stylesheet" type="text/css" href="./cubingIcons.css">
 </head>
 <body>
-    <h1>WCA Name Badge Generator (v0.1.0)</h1>
-    <p>1. Select template <select id="select-template"></select></p>
-    <p>2. Add competition data <input onchange="readWCIF(this)" type="file"><br>
-    Get data from <code>https://www.worldcubeassociation.org/api/v0/competitions/YourCompetitionID/wcif/</code> Replace <code>YourCompetitionID</code> with your competition name</p>
-    <p>3. Change background image <input onchange="readBackground(this)" type="file"></p>
+
+{% include header.html %}
     
-    <button onclick="generate()">Generate</button>
-    <button onclick="print()">Print</button>
+{% include mainImage.html image="/images/headings/cubes.jpeg" text="WCA Name Badge Generator " %}
+    
+<div class="container shadow">
+    <div class="row">
+        <div class="col-12 content">
+            <h2>Instructions</h2>            
+            <p>1. Add competition data <input onchange="readWCIF(this)" type="file"><br>
+                Get data from <code>https://www.worldcubeassociation.org/api/v0/competitions/YourCompetitionID/wcif/</code> Replace <code>YourCompetitionID</code> with your competition name</p>
+            <p>2. Select template <select id="select-template"></select></p>
+            <p>3. Change background image <input onchange="readBackground(this)" type="file"></p>
+            <p>4. 'Generate' and preview the badges</p>
+            <p>5 'Print' when ready and use these settings</p>
+            <ul>
+                <li>Layout: Landscape</li>
+                <li>More Settings
+                <ul>
+                    <li>Paper Size: A4</li>
+                    <li>Margins: None</li>
+                    <li>Background Graphics: On</li>
+                </ul> 
+                </li>
+            </ul> 
+            
+            <button onclick="generate()">Generate</button>
+            <button id="print-button" onclick="print()" disabled>Print</button>
 
-    <div id="print-document">
+            <p id="status" class="info"></p>
+
+            <div id="print-document" style="display:none;"></div>
+
+            <iframe id="document-preview" style="display:none;">
+            </iframe>
+
+            <div id="template"></div>
+
+            <p>Version 0.2.0</p>
+        </div>
     </div>
+</div>
 
-    <div id="template"></div>
+{% include footer.html %}
 
-    <script src="./moment.js"></script>
-    <script src="./moment.tz.js"></script>
-    <script src="./jquery.min.js"></script>
-    <script src="./main.js"></script>
+<script src="./moment.js"></script>
+<script src="./moment.tz.js"></script>
+<script src="./main.js"></script>
+
 </body>

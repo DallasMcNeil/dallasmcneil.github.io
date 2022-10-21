@@ -10,11 +10,27 @@
         top:0mm;
         width:14.85cm;
         height:21cm;
-        border-right: 0.25mm dotted#B0B0B0;
-        margin-right: -0.25mm;
-        background-image: url("./images/badge-a4-3x3-default.png");
+        border-right: 0.75mm dotted#B0B0B0;
+        margin-right: -0.75mm;
+        background-image: url("./images/badge-a6-book-default.png");
         background-size: 100% auto;
         background-repeat: no-repeat;
+    }
+
+    .schedule-half {
+        position:absolute;
+        right:0mm;
+        top:0mm;
+        width:14.85cm;
+        height:21cm;
+    }
+
+    .wca-schedule {
+        position:absolute;
+        left:10mm;
+        top:10mm;
+        width:12.85cm;
+        height:auto;
     }
 
     .name {
@@ -27,9 +43,9 @@
         bottom: 3.2cm;
 
         font-family: Arial, sans-serif;
-        line-height: 1.5cm;
         font-size: 1.5cm;
         font-weight: 700;
+        word-wrap: break-word;
     }
 
     .id {
@@ -39,10 +55,9 @@
         left: 0;
         right: 0;
         text-align: center;
-        bottom: 2.0cm;
+        bottom: 2.0cm; 
 
         font-family: Arial, sans-serif;
-        line-height: 1.1cm;
         font-size: 1.1cm;
         font-weight: 400;
     }
@@ -73,6 +88,29 @@
         width: auto;
     }
 
+    .wca-schedule {
+        border: 0.25mm solid #B0B0B0;
+        margin: -0.25mm;
+    }
+
+    .wca-schedule > tr > td {
+        border: 0.25mm solid #B0B0B0;
+        margin: -0.25mm;
+
+        font-family: Arial, sans-serif;
+        font-size: 0.5cm;
+        font-weight: 500;
+    }
+
+    .wca-schedule > tr > td.wca-schedule-header {
+        font-family: Arial, sans-serif;
+        font-size: 0.65cm;
+        font-weight: 600;
+        text-align: center;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
 </style>
 
 <div id="badge-template">
@@ -83,6 +121,10 @@
             <p class="wca-id id">WCAID</p>
             <img class="sca-image" src="./images/sca.png"/>
             <img class="wca-image" src="./images/wca.png">       
+        </div>
+        <div class="schedule-half">
+            <table class="wca-schedule" cellspacing="0">
+            </table>
         </div>
     </div>
 </div>

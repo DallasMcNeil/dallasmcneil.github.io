@@ -104,6 +104,7 @@ var badgeTemplates = [
 var settings = {
     template: 0,
     marginPercentage: 0.05,
+    includeStaffing: true,
 } 
 
 // Data storage
@@ -268,6 +269,7 @@ function generate() {
             badge.css("height",`${template.badgeHeight}cm`);
             badge.css("transform",`scale(${template.badgeScale})`)
             badge.css("transform-origin",`0% 0%`)
+
             badge.removeAttr("id");
             badge.show();
             if (index >= persons.length) {
@@ -275,18 +277,34 @@ function generate() {
                 badge.find(".wca-id").text(" ");
                 badge.find(".wca-comp-id").text("-");
                 badge.find(".wca-country").attr("src", "");
+                badge.find(".wca-country").hide();
             } else {
                 badge.find(".wca-name").text(persons[index].name);
                 badge.find(".wca-id").text(persons[index].wcaId);
                 badge.find(".wca-comp-id").text(`${persons[index].registrantId}`);
                 badge.find(".wca-country").attr("src", `https://flagcdn.com/h80/${persons[index].countryIso2.toLowerCase()}.png`);
             }
-            badge.css("top", `${(Math.floor(badgeIndex / template.pageColumns)) * template.badgeHeight * template.badgeScale}cm`)
-            badge.css("left", `${(badgeIndex % template.pageRows) * template.badgeWidth * template.badgeScale}cm`)
+            var by = Math.floor(badgeIndex / template.pageColumns);
+            var bx = badgeIndex % template.pageRows
+
+            badge.css("top", `${by * template.badgeHeight * template.badgeScale}cm`)
+            badge.css("left", `${bx * template.badgeWidth * template.badgeScale}cm`)
     
+            if (bx == 0) {
+                badge.css("border-left","none");
+            }
+            if (bx == template.pageColumns-1) {
+                badge.css("border-right","none");
+            }
+            if (by == 0) {
+                badge.css("border-top","none");
+            }
+            if (by == template.pageRows-1) {
+                badge.css("border-bottom","none");
+            }
+
             var personalSchedule = {}
-            if (index >= persons.length) {
-            } else {
+            if (index < persons.length && badge.find(".wca-schedule").length > 0) {
                 for (var a=0; a<persons[index].assignments.length; a++) {
                     var assignment = persons[index].assignments[a];
                     var activity = activities[assignment.activityId];
@@ -313,7 +331,7 @@ function generate() {
 
                         if (personalSchedule[day].assignments[activity.parentActivityCode] == undefined) {
                             personalSchedule[day].assignments[activity.parentActivityCode] = {
-                                timeText: `${startTime.format("HH:mm")} - ${endTime.format("HH:mm")}`,
+                                timeText: `${startTime.format("HH[<sup>]mm[</sup>]")} - ${endTime.format("HH[<sup>]mm[</sup>]")}`,
                                 sortTime: startTime.unix(),
                                 eventCode: event,
                                 eventText: eventMap[event],
@@ -369,7 +387,11 @@ function generate() {
 
                 var table = badge.find(".wca-schedule").first();
                 var tableContent = "<tbody>";
-                tableContent += "<tr><td>Time</td><td>Event</td><td>Group</td><td>Staff</td></tr>";
+                tableContent += "<tr><td>Time</td><td>Event</td><td>Group</td>"
+                if (settings.includeStaffing) {
+                    tableContent += "<td>Staff</td>";
+                }
+                tableContent += "</tr>";
                 for (var i=0; i<sortedSchedule.length; i++) {   
                     tableContent += `<tr><td colspan="4" class="wca-schedule-header">${ weekDaysMap[sortedSchedule[i].day]}</td></tr>`
                     for (var j=0; j<sortedSchedule[i].sortedAssignments.length; j++) {   
@@ -389,7 +411,11 @@ function generate() {
 
                         var eventIcon = `<i class="cubing-icon icon event-${assignment.eventCode}"></i>`
 
-                        tableContent += `<tr><td>${assignment.timeText}</td><td>${eventIcon} ${assignment.eventText}</td><td>${assignment.competing}</td><td>${roleText}</td></tr>`;
+                        tableContent += `<tr><td>${assignment.timeText}</td><td>${eventIcon} ${assignment.eventText}</td><td>${assignment.competing}</td>`
+                        if (settings.includeStaffing) {
+                            tableContent += `<td>${roleText}</td>`;
+                        }
+                        tableContent += "</tr>";
                     }
                 }
                 tableContent += "</tbody>";

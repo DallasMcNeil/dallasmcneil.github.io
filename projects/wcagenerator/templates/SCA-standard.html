@@ -1,6 +1,6 @@
 <style id="badge-template-style">
     .badge {
-        border: 0.25mm dotted#B0B0B0;
+        border: 0.25mm dashed#606060;
         margin: -0.25mm;
         background-image: url("./images/badge-a4-3x3-default.png");
         background-size: 100% auto;
@@ -14,11 +14,11 @@
         left: 0;
         right: 0;
         text-align: center;
-        bottom: 1.0cm;
+        bottom: 0.9cm;
         width: 9cm;
 
         font-family: Arial, sans-serif;
-        font-size: 0.65cm;
+        font-size: 0.75cm;
         font-weight: 700;
     }
 
@@ -47,6 +47,7 @@
     }
 
     .country {
+        border: 0.1mm solid black;
         position: absolute;
         height: 0.5cm;
         width: auto;
@@ -76,7 +77,7 @@
 </style>
 
 <div id="badge-template">
-    <div class="print-badge badge">
+    <div class="print-badge badge background-image">
         <hr size="1mm" color="black" class="line"/>
         <p class="wca-name name">Name</p>
         <p class="wca-id id">WCAID</p>

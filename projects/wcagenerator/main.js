@@ -103,7 +103,7 @@ var badgeTemplates = [
 // Settings
 var settings = {
     template: 0,
-    marginPercentage: 0.05,
+    marginPercentage: 0.03,
     includeStaffing: true,
 } 
 
@@ -200,7 +200,7 @@ function readBackground(input) {
         backgroundImage = fileReader.result;
 
         $("#background-image-style").remove()
-        var backgroundImageStyle = $(`<style id='background-image-style'>.badge {background-image:url('${backgroundImage}');}</style>`)
+        var backgroundImageStyle = $(`<style id='background-image-style'>.background-image {background-image:url('${backgroundImage}');}</style>`)
         $("body").append(backgroundImageStyle);
 
     }; 

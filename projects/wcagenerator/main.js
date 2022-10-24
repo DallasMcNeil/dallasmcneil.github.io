@@ -105,6 +105,7 @@ var settings = {
     template: 0,
     marginPercentage: 0.03,
     includeStaffing: true,
+    includeStations: true,
 } 
 
 // Data storage
@@ -171,6 +172,15 @@ function readWCIF(input) {
                 var room = venue.rooms[r];
                 for (var a=0; a<room.activities.length; a++) {
                     var activity = room.activities[a];
+
+                    activities[activity.id] = {
+                        parentActivityCode: activity.activityCode,
+                        activityCode: activity.activityCode,
+                        roundStartTime: activity.startTime,
+                        roundEndTime: activity.endTime,
+                        timezone: venue.timezone,
+                    }
+
                     for (var c=0; c<activity.childActivities.length; c++) {
                         var childActivity = activity.childActivities[c];
 
@@ -309,7 +319,7 @@ function generate() {
                     var assignment = persons[index].assignments[a];
                     var activity = activities[assignment.activityId];
                     if (activities[assignment.activityId] == undefined) {
-                        console.warn(`MISSING ACTIVITY ${activityId}`);
+                        console.warn(`MISSING ACTIVITY ${assignment.activityId}`);
                     } else {
                         var startTime = moment(activity.roundStartTime).tz(activity.timezone); 
                         var endTime = moment(activity.roundEndTime).tz(activity.timezone);
@@ -336,6 +346,7 @@ function generate() {
                                 eventCode: event,
                                 eventText: eventMap[event],
                                 competing: -1,
+                                stationNumber: assignment.stationNumber,
                                 judging: [],
                             };
                         }
@@ -388,14 +399,22 @@ function generate() {
                 var table = badge.find(".wca-schedule").first();
                 var tableContent = "<tbody>";
                 tableContent += "<tr><td>Time</td><td>Event</td><td>Group</td>"
+                if (settings.includeStations) {
+                    tableContent += "<td>Station</td>";
+                }
                 if (settings.includeStaffing) {
                     tableContent += "<td>Staff</td>";
                 }
                 tableContent += "</tr>";
                 for (var i=0; i<sortedSchedule.length; i++) {   
-                    tableContent += `<tr><td colspan="4" class="wca-schedule-header">${ weekDaysMap[sortedSchedule[i].day]}</td></tr>`
+                    tableContent += `<tr><td colspan="5" class="wca-schedule-header">${ weekDaysMap[sortedSchedule[i].day]}</td></tr>`
                     for (var j=0; j<sortedSchedule[i].sortedAssignments.length; j++) {   
                         var assignment = sortedSchedule[i].sortedAssignments[j];
+
+                        // Not showing any staffing roles and they aren't competing
+                        if (assignment.competing == -1 && !settings.includeStaffing) {
+                            continue
+                        }
 
                         var roleText = "";
                         for (var k=0; k<assignment.judging.length; k++) {
@@ -411,7 +430,21 @@ function generate() {
 
                         var eventIcon = `<i class="cubing-icon icon event-${assignment.eventCode}"></i>`
 
-                        tableContent += `<tr><td>${assignment.timeText}</td><td>${eventIcon} ${assignment.eventText}</td><td>${assignment.competing}</td>`
+                        var competingGroup = assignment.competing;
+                        if (assignment.competing == -1 && settings.includeStaffing) {
+                            competingGroup = "-";
+                        }
+
+                        tableContent += `<tr><td>${assignment.timeText}</td><td>${eventIcon} ${assignment.eventText}</td><td>${competingGroup}</td>`
+                        if (settings.includeStations) {
+                            if (assignment.competing == -1) {
+                            tableContent += `<td>-</td>`;
+                            } else if (assignment.stationNumber == null) {
+                                tableContent += `<td>any</td>`;
+                            } else {
+                                tableContent += `<td>${assignment.stationNumber}</td>`;
+                            }
+                        }
                         if (settings.includeStaffing) {
                             tableContent += `<td>${roleText}</td>`;
                         }

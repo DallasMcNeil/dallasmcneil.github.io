@@ -106,6 +106,7 @@ var settings = {
     marginPercentage: 0.03,
     includeStaffing: true,
     includeStations: true,
+    hideStaffOnlyAssignments: false,
 } 
 
 // Data storage
@@ -411,8 +412,9 @@ function generate() {
                     for (var j=0; j<sortedSchedule[i].sortedAssignments.length; j++) {   
                         var assignment = sortedSchedule[i].sortedAssignments[j];
 
-                        // Not showing any staffing roles and they aren't competing
-                        if (assignment.competing == -1 && !settings.includeStaffing) {
+                        // If the competitor isn't competing, and we don't show staffing or don't want to show staff only roles in a round
+                        // Then don't show this assignment
+                        if (assignment.competing == -1 && (!settings.includeStaffing || settings.hideStaffOnlyAssignments)) {
                             continue
                         }
 

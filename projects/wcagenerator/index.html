@@ -25,8 +25,9 @@ title: WCA Name Badge Generator
             <ul>
                 <li>Set background image <input onchange="readBackground(this)" type="file"></li>
                 <li>Page margins <input type="range" min="0" max="20" value="3" oninput="settings.marginPercentage = (this.value/100);$('#margin-value').text(this.value)"> <span id="margin-value">3</span>%</li>
-                <li><input type="checkbox" checked onclick="settings.includeStaffing = this.checked"> Include staffing in schedules</li>
                 <li><input type="checkbox" checked onclick="settings.includeStations = this.checked"> Include stations in schedules</li>
+                <li><input type="checkbox" checked onclick="settings.includeStaffing = this.checked"> Include staffing in schedules</li>
+                <li><input type="checkbox" onclick="settings.hideStaffOnlyAssignments = this.checked"> Hide staff only assignments in schedule</li>
             </ul> 
             <p>4. 'Generate' and preview the badges</p>
             <p>5 'Print' when ready and use these settings in the print dialog</p>

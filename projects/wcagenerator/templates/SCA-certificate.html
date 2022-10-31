@@ -1,0 +1,216 @@
+<style id="badge-template-style">
+    @font-face {
+        font-family: Fenix;
+        src: url(fonts/Fenix-Regular.ttf);
+    }
+
+    .badge {
+        background: #dfefdf;
+    }
+
+    .border {
+        filter: url(#border-filter);
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height:100%;
+    }
+
+    .wca-image {
+        position: absolute;
+        top: 2.2cm;
+        left: 2.2cm;
+        height: 2.8cm;
+        width: auto;
+    }
+
+    .sca-image {
+        position: absolute;
+        top: 2.2cm;
+        right: 2.2cm;
+        height: 2.8cm;
+        width: auto;
+    }
+
+    .comp-name {
+        position: absolute;
+        margin-left: auto;
+        margin-right: auto;
+        left: 0;
+        right: 0;
+        text-align: center;
+        bottom: 11cm;
+        width: 25cm;
+
+        font-family: Fenix, Arial, sans-serif;
+        font-size: 1.6cm;
+    }
+
+    .event {
+        position: absolute;
+        margin-left: auto;
+        margin-right: auto;
+        left: 0;
+        right: 0;
+        text-align: center;
+        bottom: 9.1cm;
+        width: 25cm;
+
+        font-family: Fenix, Arial, sans-serif;
+        font-size: 1.6cm;
+    }
+
+    .place {
+        position: absolute;
+        margin-left: auto;
+        margin-right: auto;
+        left: 0;
+        right: 0;
+        text-align: center;
+        bottom: 8.6cm;
+        width: 25cm;
+
+        font-family: Fenix, Arial, sans-serif;
+        font-size: 0.9cm;
+    }
+
+    .name-box {
+        position: absolute;
+        margin-left: auto;
+        margin-right: auto;
+        left: 0;
+        right: 0;
+        background-color:white;
+        bottom: 7.9cm;
+        width: 16cm;
+        height: 1.5cm;
+    }
+
+    .result-prefix {
+        position: absolute;
+        right: 15cm;
+        text-align: right;
+        bottom: 5.5cm;
+
+        font-family: Fenix, Arial, sans-serif;
+        font-size: 0.7cm;
+    }
+
+    .result-box {
+        position: absolute;
+        left: 15cm;
+        background-color:white;
+        bottom: 6.1cm;
+        width: 6cm;
+        height: 1.3cm;
+    }
+
+    .line-left {
+        position: absolute;
+        left: 2cm;
+        background-color:black;
+        bottom: 3.8cm;
+        width: 6cm;
+        height: 0.1cm;
+    }
+
+    .line-right {
+        position: absolute;
+        right: 2cm;
+        background-color:black;
+        bottom: 3.8cm;
+        width: 6cm;
+        height: 0.1cm;
+    }
+
+    .comp-date {
+        position: absolute;
+        margin-left: 7%;
+        margin-right: 93%;
+        left: 0;
+        right: 0;
+        text-align: center;
+        bottom: 3.4cm;
+        width: 6cm;
+
+        font-family: Fenix, Arial, sans-serif;
+        font-size: 0.6cm;
+    }
+    
+    .date {
+        position: absolute;
+        margin-left: 7%;
+        margin-right: 93%;
+        left: 0;
+        right: 0;
+        text-align: center;
+        bottom: 2.7cm;
+        width: 6cm;
+
+        font-family: Fenix, Arial, sans-serif;
+        font-size: 0.5cm;
+    }
+
+    .sig-name {
+        position: absolute;
+        margin-left: 73%;
+        margin-right: 27%;
+        left: 0;
+        right: 0;
+        text-align: center;
+        bottom: 2.5cm;
+        width: 6cm;
+
+        font-family: Fenix, Arial, sans-serif;
+        font-size: 0.6cm;
+    }
+    
+    .sig-role {
+        position: absolute;
+        margin-left: 73%;
+        margin-right: 27%;
+        left: 0;
+        right: 0;
+        text-align: center;
+        bottom: 2.1cm;
+        width: 6cm;
+
+        font-family: Fenix, Arial, sans-serif;
+        font-size: 0.5cm;
+    }
+
+</style>
+
+<svg id="badge-svg-filter" xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' style="display: none;">
+    <filter id='border-filter'><feColorMatrix id='border-filter-values' type='matrix' 
+        values='0 0 0 0 0
+                0 0.4 0 0 0
+                0 0 0 0 0
+                0 0 0 1 0'/>
+    </filter>
+</svg>
+
+<div id="badge-template">
+    <div class="print-badge badge background-image">
+        <img class="wca-border border" src="./images/cert-border.png"/>
+        <img class="sca-image" src="./images/sca-large.png"/>
+        <img class="wca-image" src="./images/wca-large.svg">  
+
+        <p class="wca-comp-name comp-name">Comp Name</p>
+        <p class="wca-event event">Event</p>
+        <p class="wca-place place">Place</p>
+        <div class="name-box"></div>
+
+        <p class="wca-result-prefix result-prefix">For time</p>
+        <div class="result-box"></div>
+
+        <div class="line-left"></div>
+        <p class="wca-date comp-date">Date</p>
+        <p class="date">DATE</p>
+
+        <div class="line-right"></div>
+        <p class="wca-sig-name sig-name">Name</p>
+        <p class="wca-sig-role sig-role">Role</p>
+    </div>
+</div>

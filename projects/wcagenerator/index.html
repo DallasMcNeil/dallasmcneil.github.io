@@ -20,14 +20,19 @@ title: WCA Name Badge Generator
             <h2>Instructions</h2>            
             <p>1. Add competition data <input onchange="readWCIF(this)" type="file"><br>
                 Get data from <code>https://www.worldcubeassociation.org/api/v0/competitions/YourCompetitionID/wcif/</code> Replace <code>YourCompetitionID</code> with your competition name</p>
-            <p>2. Select template <select id="select-template"></select></p>
+            <p>2. Select template <select id="select-template" onchange="templateChanged(this)"></select></p>
             <p>3. Adjust settings</p>
             <ul>
                 <li>Set background image <input onchange="readBackground(this)" type="file"></li>
                 <li>Page margins <input type="range" min="0" max="20" value="3" oninput="settings.marginPercentage = (this.value/100);$('#margin-value').text(this.value)"> <span id="margin-value">3</span>%</li>
-                <li><input type="checkbox" checked onclick="settings.includeStations = this.checked"> Include stations in schedules</li>
-                <li><input type="checkbox" checked onclick="settings.includeStaffing = this.checked"> Include staffing in schedules</li>
-                <li><input type="checkbox" onclick="settings.hideStaffOnlyAssignments = this.checked"> Hide staff only assignments in schedule</li>
+                <li class="badge-only"><input type="checkbox" checked onclick="settings.includeStations = this.checked"> Include stations in schedules</li>
+                <li class="badge-only"><input type="checkbox" checked onclick="settings.includeStaffing = this.checked"> Include staffing in schedules</li>
+                <li class="badge-only"><input type="checkbox" onclick="settings.hideStaffOnlyAssignments = this.checked"> Hide staff only assignments in schedule</li>
+                <li class="certificate-only">Background color tint <input type="text" value="#006400" onchange="settings.certBorderTint = this.value"></input></li>
+                <li class="certificate-only">Text color <input type="text" value="#006400" onchange="settings.certTextColor = this.value"></input></li>
+                <li class="certificate-only">Page color <input type="text" value="#dfefdf" onchange="settings.certPageColor = this.value"></input></li>
+                <li class="certificate-only">Signature name for certificate <input type="text" value="Name" onchange="settings.certOrganiser = this.value"></input></li>
+                <li class="certificate-only">Signature role for certificate <input type="text" value="WCA DELEGATE" onchange="settings.certRole = this.value"></input></li>
             </ul> 
             <p>4. 'Generate' and preview the badges</p>
             <p>5 'Print' when ready and use these settings in the print dialog</p>
@@ -54,7 +59,7 @@ title: WCA Name Badge Generator
 
             <div id="template"></div>
 
-            <p>Version 0.2.0</p>
+            <p>Version 0.4.0</p>
         </div>
     </div>
 </div>

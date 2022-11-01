@@ -1,5 +1,5 @@
 ---
-title: WCA Name Badge Generator 
+title: Badgifier
 ---
 <!DOCTYPE html>	
 <head>
@@ -12,15 +12,19 @@ title: WCA Name Badge Generator
 
 {% include header.html %}
     
-{% include mainImage.html image="/images/headings/cubes.jpeg" text="WCA Name Badge Generator " %}
+{% include mainImage.html image="/images/headings/cubes.jpeg" text="Badgifier" %}
     
 <div class="container shadow">
     <div class="row">
         <div class="col-12 content">
-            <h2>Instructions</h2>            
+            <h2>Badgifier generates customisable name badges, personal schedules and certificates for WCA competitions</h2>
+
+            <h3>Instructions</h3>            
             <p>1. Add competition data <input onchange="readWCIF(this)" type="file"><br>
-                Get data from <code>https://www.worldcubeassociation.org/api/v0/competitions/YourCompetitionID/wcif/</code> Replace <code>YourCompetitionID</code> with your competition name</p>
-            <p>2. Select template <select id="select-template" onchange="templateChanged(this)"></select></p>
+                You should use <a link="https://groupifier.jonatanklosko.com/">Groupifier</a> to generate groups first.<br>
+                Then get your WCIF file from <code>https://www.worldcubeassociation.org/api/v0/competitions/YourCompetitionID/wcif/</code><br>
+                Replace <code>YourCompetitionID</code> with your competition's name</p>
+            <p>2. Select template <select id="select-template" onchange="templateChanged(this)"></select> <span id="template-description"></span></p>
             <p>3. Adjust settings</p>
             <ul>
                 <li>Set background image <input onchange="readBackground(this)" type="file"></li>
@@ -34,8 +38,8 @@ title: WCA Name Badge Generator
                 <li class="certificate-only">Signature name for certificate <input type="text" value="Name" onchange="settings.certOrganiser = this.value"></input></li>
                 <li class="certificate-only">Signature role for certificate <input type="text" value="WCA DELEGATE" onchange="settings.certRole = this.value"></input></li>
             </ul> 
-            <p>4. 'Generate' and preview the badges</p>
-            <p>5 'Print' when ready and use these settings in the print dialog</p>
+            <p>4. 'Generate' and preview the document. Adjust settings as needed and 'Generate' again</p>
+            <p>5. 'Print' when ready and use these settings in the print dialog</p>
             <ul>
                 <li>Layout: Landscape</li>
                 <li>More Settings
@@ -49,7 +53,6 @@ title: WCA Name Badge Generator
 
             <button onclick="generate()">Generate</button>
             <button id="print-button" onclick="print()" disabled>Print</button>
-
             <p id="status" class="info"></p>
 
             <div id="print-document" style="display:none;"></div>
@@ -59,7 +62,7 @@ title: WCA Name Badge Generator
 
             <div id="template"></div>
 
-            <p>Version 0.4.0</p>
+            <p>Version 1.0.0</p>
         </div>
     </div>
 </div>

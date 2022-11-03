@@ -16,11 +16,11 @@ function fitText(textElem, lines) {
         var bottom = parseInt(textElem.css("bottom"), 10);
         textElem.css("bottom", bottom + 1);
     }
+    textElem.css("line-height", textElem.css("font-size"));
 }
 
 // Fit all name elements in name badges
 function fixNameText() {
-    console.log("Fit")
     $("body").find(".wca-name").each(function() {
         fitText($(this), 2);
     });

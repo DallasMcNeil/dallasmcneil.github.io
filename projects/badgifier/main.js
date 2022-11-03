@@ -184,26 +184,6 @@ var backgroundImage = ""
 
 // Utility functions
 
-// Shrink a text element until it's overall height is
-// within 'lines' number of lines tall with the initial font size
-function fitText(textElem, lines) {
-    // Get height and maximum height allowed
-    var height = textElem.height();
-    var maxHeight = parseInt(textElem.css("font-size"), 10) * lines;
-
-    // If too tall, reduce font size until it fits
-    while (maxHeight < height) {
-        size = parseInt(textElem.css("font-size"), 10);
-        textElem.css("font-size", size - 1);
-        height = textElem.height();
-
-        // Adjust position
-        // Assumed font is positioned relative to bottom
-        var bottom = parseInt(textElem.css("bottom"), 10);
-        textElem.css("bottom", bottom + 1);
-    }
-}
-
 // Convert a hexadecimal number to rgb components
 function hexToRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -750,7 +730,16 @@ function print() {
 
     printwin.document.write('<script src="./jquery.min.js"></script>');
     printwin.document.write('<script src="./document.js"></script>');
-    printwin.document.write('<script>$(document).ready(function () { fixNameText(); window.print(); window.stop(); window.close(); });</script>');
+    printwin.document.write(`<script>
+    $(document).ready(function() {
+        fixNameText();
+        setTimeout(function() {
+            window.print(); 
+            window.stop(); 
+            window.close(); 
+        }, 500);
+    });
+    </script>`);
     printwin.document.write('</body></html>');
     printwin.document.close();
 }

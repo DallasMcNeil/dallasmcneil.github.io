@@ -321,6 +321,12 @@ function generate() {
     })
 
     persons.sort((a,b) => {
+        if (a.wcaId == null && b.wcaId != null) {
+            return -1
+        }
+        if (a.wcaId != null && b.wcaId == null) {
+            return 1
+        }
         if (a.name < b.name) {
             return -1;
         }
@@ -398,7 +404,11 @@ function generate() {
                     badge.find(".wca-country").hide();
                 } else {
                     badge.find(".wca-name").text(persons[index].name);
-                    badge.find(".wca-id").text(persons[index].wcaId);
+                    if (persons[index].wcaId == null) {
+                        badge.find(".wca-id").html("<b style='color:#D00000'>NEWCOMER</b>");
+                    } else {
+                        badge.find(".wca-id").text(persons[index].wcaId);
+                    }
                     badge.find(".wca-comp-id").text(`${persons[index].registrantId}`);
                     badge.find(".wca-country").attr("src", `https://flagcdn.com/h80/${persons[index].countryIso2.toLowerCase()}.png`);
                 }

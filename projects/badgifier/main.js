@@ -165,6 +165,7 @@ var settings = {
     includeStaffing: true,
     includeStations: true,
     hideStaffOnlyAssignments: false,
+    showWcaLiveQrCode: true,
     // Certificate settings
     certOrganiser: "Name",
     certRole: "WCA DELEGATE",
@@ -414,6 +415,10 @@ function generate() {
                 }
                 var by = Math.floor(badgeIndex / template.pageColumns);
                 var bx = badgeIndex % template.pageRows
+
+                if (!settings.showWcaLiveQrCode) {
+                    badge.find(".wca-live").hide();
+                }
 
                 // Place bade
                 badge.css("top", `${by * template.badgeHeight * template.badgeScale}cm`)

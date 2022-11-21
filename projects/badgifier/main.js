@@ -77,9 +77,9 @@ const fewestMovesFormatText = "Moves:"
 
 var templates = [
     {
-        name: "SCA Basic 3x3",
+        name: "Basic 3x3",
         description: "3 rows of 3 badges for printing on a landscape A4 page, no schedule",
-        link: "./templates/SCA-standard.html",
+        link: "./templates/Standard-basic.html",
         isCertificate: false,
         pageWidth: 29.7,
         pageHeight: 20.9818,
@@ -90,9 +90,9 @@ var templates = [
         badgeScale: 1.0,
     },
     {
-        name: "SCA Book",
+        name: "Book",
         description: "Individual portrait badge and schedule for printing on a single landscape A6 page",
-        link: "./templates/SCA-book.html",
+        link: "./templates/Standard-book.html",
         isCertificate: false,
         pageWidth: 29.7,
         pageHeight: 20.9818,
@@ -103,9 +103,9 @@ var templates = [
         badgeScale: 1.0,
     },
     {
-        name: "SCA Book 2x2",
+        name: "Book 2x2",
         description: "2 rows of 2 columns of portrait badges and schedule for printing on a landscape A4 page",
-        link: "./templates/SCA-book.html",
+        link: "./templates/Standard-book.html",
         isCertificate: false,
         pageWidth: 29.7,
         pageHeight: 20.9818,
@@ -116,9 +116,9 @@ var templates = [
         badgeScale: 0.5,
     },
     {
-        name: "SCA Landscape Book",
+        name: "Landscape Book",
         description: "Individual landscape badge and schedule for printing on a single landscape A6 page",
-        link: "./templates/SCA-book-landscape.html",
+        link: "./templates/Standard-book-landscape.html",
         isCertificate: false,
         pageWidth: 29.7,
         pageHeight: 20.9818,
@@ -129,9 +129,9 @@ var templates = [
         badgeScale: 1.0,
     },
     {
-        name: "SCA Landscape Book 2x2",
+        name: "Landscape Book 2x2",
         description: "2 rows of 2 columns of landscape badges and schedule for printing on a landscape A4 page",
-        link: "./templates/SCA-book-landscape.html",
+        link: "./templates/Standard-book-landscape.html",
         isCertificate: false,
         pageWidth: 29.7,
         pageHeight: 20.9818,
@@ -142,9 +142,9 @@ var templates = [
         badgeScale: 0.5,
     },
     {
-        name: "SCA Certificate",
+        name: "Certificate",
         description: "Landscape certificates for all events",
-        link: "./templates/SCA-certificate.html",
+        link: "./templates/Standard-certificate.html",
         isCertificate: true,
         pageWidth: 29.7,
         pageHeight: 20.9818,
@@ -182,6 +182,8 @@ var wcif = undefined
 var activities = {}
 // Raw background image data for name badges
 var backgroundImage = ""
+// Raw logo image data for name badges
+var organizationImage = ""
 
 // Utility functions
 
@@ -284,7 +286,7 @@ function readWCIF(input) {
 }
 
 // Read background image from user
-function readBackground(input) {
+function readBackgroundImage(input) {
     let file = input.files[0]; 
     let fileReader = new FileReader(); 
     fileReader.readAsDataURL(file); 
@@ -297,6 +299,26 @@ function readBackground(input) {
         $("body").append(backgroundImageStyle);
 
         setStatus("Updated background image", STATUS_MODE_INFO);
+    }; 
+    fileReader.onerror = function() {
+        setStatus("Couldn't read image file", STATUS_MODE_ERROR);
+    }; 
+}
+
+// Read organization image from user
+function readOrganizationImage(input) {
+    let file = input.files[0]; 
+    let fileReader = new FileReader(); 
+    fileReader.readAsDataURL(file); 
+    fileReader.onload = function() {
+        organizationImage = fileReader.result;
+
+        // Add organization image css to style badges
+        $("#organization-image-style").remove()
+        var organizationImageStyle = $(`<style id='organization-image-style'>.organization-image {background-image:url('${organizationImage}');}</style>`)
+        $("body").append(organizationImageStyle);
+
+        setStatus("Updated organization image", STATUS_MODE_INFO);
     }; 
     fileReader.onerror = function() {
         setStatus("Couldn't read image file", STATUS_MODE_ERROR);
@@ -707,6 +729,9 @@ function preview() {
     if ($("#background-image-style").prop('outerHTML') != undefined) {
         bodyHtml += $("#background-image-style").prop('outerHTML');
     }
+    if ($("#organization-image-style").prop('outerHTML') != undefined) {
+        bodyHtml += $("#organization-image-style").prop('outerHTML');
+    }
     if ($("#badge-svg-filter").prop('outerHTML') != undefined) {
         bodyHtml += $("#badge-svg-filter").prop('outerHTML');
     }
@@ -735,6 +760,9 @@ function print() {
     printwin.document.write($("#badge-template-style").prop('outerHTML'));
     if ($("#background-image-style").prop('outerHTML') != undefined) {
         printwin.document.write($("#background-image-style").prop('outerHTML'));
+    }     
+    if ($("#organization-image-style").prop('outerHTML') != undefined) {
+        printwin.document.write($("#organization-image-style").prop('outerHTML'));
     }    
     if ($("#badge-svg-filter").prop('outerHTML') != undefined) {
         printwin.document.write($("#badge-svg-filter").prop('outerHTML'));

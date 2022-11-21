@@ -12,7 +12,7 @@ title: Badgifier
 
 {% include header.html %}
     
-{% include mainImage.html image="/images/headings/cubes.jpeg" text="Badgifier" %}
+{% include mainImage.html image="/images/headings/badgifier.jpeg" text="Badgifier" %}
     
 <div class="container shadow">
     <div class="row">
@@ -27,7 +27,8 @@ title: Badgifier
             <p>2. Select template <select id="select-template" onchange="templateChanged(this)"></select> <span id="template-description"></span></p>
             <p>3. Adjust settings</p>
             <ul>
-                <li>Set background image <input onchange="readBackground(this)" type="file"></li>
+                <li>Set background image <input onchange="readBackgroundImage(this)" type="file"></li>
+                <li>Set organization image <input onchange="readOrganizationImage(this)" type="file"></li>
                 <li>Page margins <input type="range" min="0" max="20" value="3" oninput="settings.marginPercentage = (this.value/100);$('#margin-value').text(this.value)"> <span id="margin-value">3</span>%</li>
                 <li class="badge-only"><input type="checkbox" checked onclick="settings.includeStations = this.checked"> Include stations in schedules</li>
                 <li class="badge-only"><input type="checkbox" checked onclick="settings.includeStaffing = this.checked"> Include staffing in schedules</li>
@@ -63,7 +64,7 @@ title: Badgifier
 
             <div id="template"></div>
 
-            <p>Version 1.1.0</p>
+            <p>Version 1.2.0</p>
         </div>
     </div>
 </div>

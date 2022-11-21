@@ -59,19 +59,29 @@
     }
 
     .wca-image {
+        background-image: url("./images/wca.png");         
+        background-size: auto 100%;
+        background-repeat: no-repeat;
+        background-position: 0% 0%;
+
         position: absolute;
         bottom: 0.3cm;
         left: 0.5cm;
         height: 1.1cm;
-        width: auto;
+        width: 5cm;
     }
 
-    .sca-image {
+    .organization-image {
+        background-image: url("./images/sca.png");        
+        background-size: auto 100%;
+        background-repeat: no-repeat;
+        background-position: 100% 0%;
+
         position: absolute;
         bottom: 0.3cm;
         right: 0.5cm;
         height: 1.1cm;
-        width: auto;
+        width: 5cm;
     }
 
 </style>
@@ -81,8 +91,8 @@
         <hr size="1mm" color="black" class="line"/>
         <p class="wca-name name">Name</p>
         <p class="wca-id id">WCAID</p>
-        <img class="sca-image" src="./images/sca.png"/>
-        <img class="wca-image" src="./images/wca.png">
+        <div class="wca-image"></div>
+        <div class="organization-image"></div>
         <img class="wca-country country" src="https://flagcdn.com/h80/au.png">     
     </div>
 </div>

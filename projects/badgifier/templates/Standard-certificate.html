@@ -18,19 +18,29 @@
     }
 
     .wca-image {
+        background-image: url("./images/wca.png");         
+        background-size: auto 100%;
+        background-repeat: no-repeat;
+        background-position: 0% 0%;
+
         position: absolute;
         top: 2.2cm;
         left: 2.2cm;
         height: 2.8cm;
-        width: auto;
+        width: 14.0cm;
     }
 
-    .sca-image {
+    .organization-image {
+        background-image: url("./images/sca.png");        
+        background-size: auto 100%;
+        background-repeat: no-repeat;
+        background-position: 100% 0%;
+
         position: absolute;
         top: 2.2cm;
         right: 2.2cm;
         height: 2.8cm;
-        width: auto;
+        width: 14.0cm;
     }
 
     .comp-name {
@@ -194,8 +204,8 @@
 <div id="badge-template">
     <div class="print-badge badge background-image">
         <img class="wca-border border" src="./images/cert-border.png"/>
-        <img class="sca-image" src="./images/sca-large.png"/>
-        <img class="wca-image" src="./images/wca-large.svg">  
+        <div class="wca-image"></div>
+        <div class="organization-image"></div>
 
         <p class="wca-comp-name comp-name">Comp Name</p>
         <p class="wca-event event">Event</p>

@@ -8,22 +8,24 @@
         position:absolute;
         left:0mm;
         top:0mm;
-        width:14.85cm;
-        height:21cm;
-        border-right: 0.50mm solid#606060;
-        margin-right: -0.50mm;
-        background-image: url("./images/badge-a6-book-default.png");
+        height:14.85cm;
+        width:21cm;
+        border-bottom: 0.50mm solid#606060;
+        margin-bottom: -0.50mm;
+        background-image: url("./images/badge-a4-3x3-default.png");
         background-size: 100% auto;
         background-repeat: no-repeat;
+        transform-origin: 0% 0%;
+        transform:rotate(90deg) translate(0cm, -29.7cm);
     }
 
     .schedule-half {
         position:absolute;
-        right:0mm;
+        left:0mm;
         top:0mm;
         width:14.85cm;
         height:21cm;
-    }
+    } 
 
     .name {
         position: absolute;
@@ -32,12 +34,12 @@
         left: 0;
         right: 0;
         text-align: center;
-        bottom: 3.2cm;
+        bottom: 2.0cm;
+        width: 13.85cm;
 
         font-family: Arial, sans-serif;
         font-size: 1.5cm;
         font-weight: 700;
-        width:13.85cm;
         word-wrap: break-word;
     }
 
@@ -48,17 +50,17 @@
         left: 0;
         right: 0;
         text-align: center;
-        bottom: 2.0cm; 
+        bottom: 1.0cm;
 
         font-family: Arial, sans-serif;
-        font-size: 1.1cm;
+        font-size: 1.0cm;
         font-weight: 400;
     }
 
     .line {
         position: absolute;
         width: 12cm;
-        bottom: 4.2cm;
+        bottom: 3.0cm;
         margin-left: auto;
         margin-right: auto;
         left: 0;
@@ -70,7 +72,7 @@
         position: absolute;
         height: 1cm;
         width: auto;
-        bottom: 2cm;
+        bottom: 0.8cm;
         margin-left: auto;
         margin-right: auto;
         left: 0;
@@ -78,19 +80,29 @@
     }
 
     .wca-image {
+        background-image: url("./images/wca.png");         
+        background-size: auto 100%;
+        background-repeat: no-repeat;
+        background-position: 0% 0%;
+
         position: absolute;
         bottom: 0.65cm;
         left: 0.8cm;
-        height: 2.0cm;
-        width: auto;
+        height: 2.2cm;
+        width: 11.0cm;
     }
 
-    .sca-image {
+    .organization-image {
+        background-image: url("./images/sca.png");        
+        background-size: auto 100%;
+        background-repeat: no-repeat;
+        background-position: 100% 0%;
+
         position: absolute;
         bottom: 0.65cm;
         right: 0.8cm;
-        height: 2.0cm;
-        width: auto;
+        height: 2.2cm;
+        width: 11.0cm;
     }
 
     .wca-schedule {
@@ -155,7 +167,7 @@
         font-weight: 500;
         word-wrap: break-word;
     }
-    
+
     .wca-live-image {
         position: absolute;
         height: 3cm;
@@ -180,14 +192,6 @@
 
 <div id="badge-template">
     <div class="print-badge badge">
-        <div class="name-half background-image">
-            <hr size="2mm" color="black" class="line"/>
-            <p class="wca-name name">Name</p>
-            <p class="wca-id id">WCAID</p>
-            <img class="sca-image" src="./images/sca.png"/>
-            <img class="wca-image" src="./images/wca.png">    
-            <img class="wca-country country" src="https://flagcdn.com/h80/au.png">        
-        </div>
         <div class="schedule-half">
             <p class="wca-name name-back">Name</p>
             <p class="wca-comp-id comp-id">0</p>
@@ -196,6 +200,14 @@
                 <img class="wca-live-image" src="./images/wca-live-qrcode.png"/>
                 <p class="wca-live-message">Live results and full schedule available on WCA Live</p>
             </span>
+        </div>
+        <div class="name-half background-image">
+            <hr size="2mm" color="black" class="line"/>
+            <p class="wca-name name">Name</p>
+            <p class="wca-id id">WCAID</p>
+            <div class="wca-image"></div>
+            <div class="organization-image"></div>
+            <img class="wca-country country" src="https://flagcdn.com/h80/au.png">      
         </div>
     </div>
 </div>

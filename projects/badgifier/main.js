@@ -33,6 +33,48 @@ const eventMap = {
     "skewb": "Skewb",
 }
 
+const eventCount = 18;
+const eventOrder = {
+    "333":0,
+    "222":1,
+    "444":2,
+    "555":3,
+    "666":4,
+    "777":5,
+    "333bf":6,
+    "333fm":7,
+    "333oh":8,
+    "clock":9,
+    "minx":10,
+    "pyram":11,
+    "skewb":12,
+    "sq1":13,
+    "444bf":14,
+    "555bf":15,
+    "333mbf":16,
+    "333ft":17,
+}
+const eventOrderName = [
+    "333",
+    "222",
+    "444",
+    "555",
+    "666",
+    "777",
+    "333bf",
+    "333fm",
+    "333oh",
+    "clock",
+    "minx",
+    "pyram",
+    "skewb",
+    "sq1",
+    "444bf",
+    "555bf",
+    "333mbf",
+    "333ft",
+]
+
 // Award place to text
 const placeMap = [
     "First Place awarded to:", 
@@ -142,6 +184,32 @@ var templates = [
         badgeScale: 0.5,
     },
     {
+        name: "Champs Name Badge",
+        description: "Individual portrait badge and schedule for printing on a single landscape A5 page",
+        link: "./templates/Champs-book.html",
+        isCertificate: false,
+        pageWidth: 29.7,
+        pageHeight: 20.9818,
+        pageRows: 1,
+        pageColumns: 1,
+        badgeWidth: 29.7,
+        badgeHeight: 20.9818,
+        badgeScale: 1.0,
+    },
+    {
+        name: "Champs Participation Certificate",
+        description: "Participation certificate for every competitor, for printing on a single landscape A4 page",
+        link: "./templates/Champs-participation.html",
+        isCertificate: false,
+        pageWidth: 29.7,
+        pageHeight: 20.9818,
+        pageRows: 1,
+        pageColumns: 1,
+        badgeWidth: 29.7,
+        badgeHeight: 20.9818,
+        badgeScale: 1.0,
+    },
+    {
         name: "Certificate",
         description: "Landscape certificates for all events",
         link: "./templates/Standard-certificate.html",
@@ -153,7 +221,7 @@ var templates = [
         badgeWidth: 29.7,
         badgeHeight: 20.9818,
         badgeScale: 1.0,
-    }
+    },
 ]
 
 // Settings
@@ -333,6 +401,8 @@ function generate() {
         return;
     }
 
+    let regionNames = new Intl.DisplayNames(['en'], {type: 'region'});
+
     // Name badges should only be for accepted people and in alphabetical order
     var persons = wcif.persons.filter((a) => {
         if (a.registration != null) {
@@ -425,6 +495,8 @@ function generate() {
                     badge.find(".wca-comp-id").text("-");
                     badge.find(".wca-country").attr("src", "");
                     badge.find(".wca-country").hide();
+                    badge.find(".wca-events").text(" ");
+                    badge.find(".wca-country-name").text(" ");
                 } else {
                     badge.find(".wca-name").text(persons[index].name);
                     if (persons[index].wcaId == null) {
@@ -434,6 +506,28 @@ function generate() {
                     }
                     badge.find(".wca-comp-id").text(`${persons[index].registrantId}`);
                     badge.find(".wca-country").attr("src", `https://flagcdn.com/h80/${persons[index].countryIso2.toLowerCase()}.png`);
+                    badge.find(".wca-country-name").text(regionNames.of(persons[index].countryIso2.toUpperCase()));
+                    if (badge.find(".wca-events").length > 0)
+                    {
+                        var inEvents = new Array(eventCount).fill(false);
+                        for (var a=0; a<persons[index].assignments.length; a++) {
+                            var assignment = persons[index].assignments[a]; 
+                            var activity = activities[assignment.activityId];                        
+                            var codes = activity.activityCode.split('-')
+                            var event = codes[0]
+                            if (assignment.assignmentCode == "competitor") {
+                                inEvents[eventOrder[event]] = true;
+                            }
+                        }
+
+                        var eventString = "";
+                        for (var e=0; e<eventCount; e++) {
+                            if (inEvents[e]) {
+                                eventString += `<i class="cubing-icon icon event-${eventOrderName[e]}"></i>`;
+                            }
+                        }
+                        badge.find(".wca-events").html(eventString);
+                    }
                 }
                 var by = Math.floor(badgeIndex / template.pageColumns);
                 var bx = badgeIndex % template.pageRows

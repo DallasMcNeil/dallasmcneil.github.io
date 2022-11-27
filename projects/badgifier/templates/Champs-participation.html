@@ -1,25 +1,4 @@
 <style id="badge-template-style">
-    .name-half {
-        position:absolute;
-        left:0mm;
-        top:0mm;
-        width:14.85cm;
-        height:21cm;
-        border-right: 0.50mm solid#606060;
-        margin-right: -0.50mm;
-        background-image: url("./images/badge-a6-book-default.png");
-        background-size: 100% auto;
-        background-repeat: no-repeat;
-    }
-
-    .schedule-half {
-        position:absolute;
-        right:0mm;
-        top:0mm;
-        width:14.85cm;
-        height:21cm;
-    }
-
     .name {
         position: absolute;
         margin-left: auto;
@@ -27,9 +6,9 @@
         left: 0;
         right: 0;
         text-align: center;
-        bottom: 3.2cm;
+        bottom: 10.2cm;
 
-        font-family: Arial, sans-serif;
+        font-family: Bahnschrift, Arial, sans-serif;
         font-size: 1.5cm;
         font-weight: 700;
         width:13.85cm;
@@ -43,21 +22,11 @@
         left: 0;
         right: 0;
         text-align: center;
-        bottom: 2.0cm; 
+        bottom: 7.0cm; 
 
-        font-family: Arial, sans-serif;
+        font-family: Bahnschrift, Arial, sans-serif;
         font-size: 1.1cm;
         font-weight: 400;
-    }
-
-    .line {
-        position: absolute;
-        width: 12cm;
-        bottom: 4.2cm;
-        margin-left: auto;
-        margin-right: auto;
-        left: 0;
-        right: 0;
     }
 
     .country {
@@ -65,110 +34,39 @@
         position: absolute;
         height: 1cm;
         width: auto;
-        bottom: 2cm;
+        bottom: 4cm;
         margin-left: auto;
         margin-right: auto;
         left: 0;
         right: 0;
     }
 
-    .wca-image {
+    .country-name {
         position: absolute;
-        bottom: 0.65cm;
-        left: 0.8cm;
-        height: 2.0cm;
-        width: auto;
-    }
-
-    .sca-image {
-        position: absolute;
-        bottom: 0.65cm;
-        right: 0.8cm;
-        height: 2.0cm;
-        width: auto;
-    }
-
-    .wca-schedule {
-        border: 0.25mm solid #B0B0B0;
-        margin: -0.25mm;
-
-        position:absolute;
-        left:5mm;
-        top:25mm;
-        width:13.85cm;
-        height:auto;
-    }
-
-    .wca-schedule > tbody > tr:first-child > td {
-        border: 0.25mm solid #B0B0B0;
-        margin: -0.25mm;
-
-        font-family: Arial, sans-serif;
-        font-size: 0.4cm;
-        font-weight: 500;
-    }
-
-    .wca-schedule > tbody > tr > td {
-        border: 0.25mm solid #B0B0B0;
-        margin: -0.25mm;
-
-        font-family: Arial, sans-serif;
-        font-size: 0.5cm;
-        font-weight: 500;
-    }
-
-    .wca-schedule > tbody > tr > td.wca-schedule-header {
-        font-family: Arial, sans-serif;
-        font-size: 0.6cm;
-        font-weight: 600;
-        text-align: center;
         margin-left: auto;
         margin-right: auto;
+        left: 0;
+        right: 0;
+        text-align: center;
+        bottom: 2.0cm; 
+
+        font-family: Bahnschrift, Arial, sans-serif;
+        font-size: 1.1cm;
+        font-weight: 400;
     }
 
-    .name-back {
+    .events {
         position: absolute;
-        text-align: left;
-        bottom: 18cm;
-        left: 0.5cm;
-        width:8.85cm;
+        margin-left: auto;
+        margin-right: auto;
+        left: 0;
+        right: 0;
+        text-align: center;
+        bottom: 0.0cm; 
 
         font-family: Arial, sans-serif;
-        font-size: 0.8cm;
-        font-weight: 700;
-        word-wrap: break-word;
-    }
-
-    .comp-id {
-        position: absolute;
-        right: 0.5cm;
-        top: 0.5cm;
-        text-align: right;
-
-        font-family: Arial, sans-serif;
-        font-size: 0.5cm;
-        font-weight: 500;
-        word-wrap: break-word;
-    }
-    
-    .wca-live-image {
-        position: absolute;
-        height: 3cm;
-        right: 0.5cm;
-        bottom: 0.5cm;
-    }
-
-    .wca-live-message {
-        position: absolute;
-        text-align: right;
-        bottom: 0.1cm;
-        right: 3.8cm;
-        width: 7cm;
-
-        font-family: Arial, sans-serif;
-        font-size: 0.7cm;
-        font-weight: 500;
-        word-wrap: break-word;
+        font-size: 1.1cm;
+        font-weight: 400;
     }
 
 </style>
@@ -177,6 +75,7 @@
     <div class="print-badge badge">
         <p class="wca-name name">Name</p>
         <p class="wca-id id">WCAID</p>
+        <p class="wca-country-name country-name">Country</p>
         <img class="wca-country country" src="https://flagcdn.com/h80/au.png">     
         <p class="wca-events events"></p>   
     </div>

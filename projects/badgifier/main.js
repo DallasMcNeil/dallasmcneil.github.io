@@ -124,7 +124,7 @@ var templates = [
         link: "./templates/Standard-basic.html",
         isCertificate: false,
         pageWidth: 29.7,
-        pageHeight: 20.9818,
+        pageHeight: 21,
         pageRows: 3,
         pageColumns: 3,
         badgeWidth: 9.9,
@@ -137,11 +137,11 @@ var templates = [
         link: "./templates/Standard-book.html",
         isCertificate: false,
         pageWidth: 29.7,
-        pageHeight: 20.9818,
+        pageHeight: 21,
         pageRows: 1,
         pageColumns: 1,
         badgeWidth: 29.7,
-        badgeHeight: 20.9818,
+        badgeHeight: 21,
         badgeScale: 1.0,
     },
     {
@@ -150,11 +150,11 @@ var templates = [
         link: "./templates/Standard-book.html",
         isCertificate: false,
         pageWidth: 29.7,
-        pageHeight: 20.9818,
+        pageHeight: 21,
         pageRows: 2,
         pageColumns: 2,
         badgeWidth: 29.7,
-        badgeHeight: 20.9818,
+        badgeHeight: 21,
         badgeScale: 0.5,
     },
     {
@@ -163,11 +163,11 @@ var templates = [
         link: "./templates/Standard-book-landscape.html",
         isCertificate: false,
         pageWidth: 29.7,
-        pageHeight: 20.9818,
+        pageHeight: 21,
         pageRows: 1,
         pageColumns: 1,
         badgeWidth: 29.7,
-        badgeHeight: 20.9818,
+        badgeHeight: 21,
         badgeScale: 1.0,
     },
     {
@@ -176,11 +176,11 @@ var templates = [
         link: "./templates/Standard-book-landscape.html",
         isCertificate: false,
         pageWidth: 29.7,
-        pageHeight: 20.9818,
+        pageHeight: 21,
         pageRows: 2,
         pageColumns: 2,
         badgeWidth: 29.7,
-        badgeHeight: 20.9818,
+        badgeHeight: 21,
         badgeScale: 0.5,
     },
     {
@@ -189,11 +189,11 @@ var templates = [
         link: "./templates/Champs-book.html",
         isCertificate: false,
         pageWidth: 29.7,
-        pageHeight: 20.9818,
+        pageHeight: 21,
         pageRows: 1,
         pageColumns: 1,
         badgeWidth: 29.7,
-        badgeHeight: 20.9818,
+        badgeHeight: 21,
         badgeScale: 1.0,
     },
     {
@@ -201,13 +201,26 @@ var templates = [
         description: "Participation certificate for every competitor, for printing on a single landscape A4 page",
         link: "./templates/Champs-participation.html",
         isCertificate: false,
-        pageWidth: 29.7,
-        pageHeight: 20.9818,
+        pageWidth: 21,
+        pageHeight: 29.713,
         pageRows: 1,
         pageColumns: 1,
-        badgeWidth: 29.7,
-        badgeHeight: 20.9818,
+        badgeWidth: 21,
+        badgeHeight: 29.713,
         badgeScale: 1.0,
+    },
+    {
+        name: "Champs Schedules",
+        description: "Individual schedules for all people in one large PDF",
+        link: "./templates/Champs-schedules.html",
+        isCertificate: false,
+        pageWidth: 21,
+        pageHeight: 29.713,
+        pageRows: 2,
+        pageColumns: 2,
+        badgeWidth: 14.85,
+        badgeHeight: 21,
+        badgeScale: 0.707,
     },
     {
         name: "Certificate",
@@ -215,11 +228,11 @@ var templates = [
         link: "./templates/Standard-certificate.html",
         isCertificate: true,
         pageWidth: 29.7,
-        pageHeight: 20.9818,
+        pageHeight: 21,
         pageRows: 1,
         pageColumns: 1,
         badgeWidth: 29.7,
-        badgeHeight: 20.9818,
+        badgeHeight: 21,
         badgeScale: 1.0,
     },
 ]
@@ -323,23 +336,41 @@ function readWCIF(input) {
                 for (var a=0; a<room.activities.length; a++) {
                     var activity = room.activities[a];
 
-                    activities[activity.id] = {
-                        parentActivityCode: activity.activityCode,
-                        activityCode: activity.activityCode,
-                        roundStartTime: activity.startTime,
-                        roundEndTime: activity.endTime,
-                        timezone: venue.timezone,
+                    if (activities[activity.id] == undefined)
+                    {
+                        activities[activity.id] = {
+                            parentActivityCode: activity.activityCode,
+                            activityCode: activity.activityCode,
+                            roundStartTime: activity.startTime,
+                            roundEndTime: activity.endTime,
+                            groupStartTime: activity.startTime,
+                            groupEndTime: activity.endTime,
+                            timezone: venue.timezone,
+                        }
+                    }
+                    else
+                    {
+                        console.warn(`Activity ID ${activity.id} (${activity.activityCode}) already used by ${activities[activity.id].activityCode}`)
                     }
 
                     for (var c=0; c<activity.childActivities.length; c++) {
                         var childActivity = activity.childActivities[c];
 
-                        activities[childActivity.id] = {
-                            parentActivityCode: activity.activityCode,
-                            activityCode: childActivity.activityCode,
-                            roundStartTime: activity.startTime,
-                            roundEndTime: activity.endTime,
-                            timezone: venue.timezone,
+                        if (activities[childActivity.id] == undefined)
+                        {
+                            activities[childActivity.id] = {
+                                parentActivityCode: activity.activityCode,
+                                activityCode: childActivity.activityCode,
+                                roundStartTime: activity.startTime,
+                                roundEndTime: activity.endTime,
+                                groupStartTime: childActivity.startTime,
+                                groupEndTime: childActivity.endTime,
+                                timezone: venue.timezone,
+                            }
+                        }
+                        else
+                        {
+                            console.warn(`Activity ID ${activity.id} (${activity.activityCode}) already used by ${activities[activity.id].activityCode}`)
                         }
                     }
                 }
@@ -411,7 +442,82 @@ function generate() {
             }
         }
         return false;
-    })
+    })    
+    var staff = false;
+
+
+    // Non competing staff
+    // var staff = true;
+    // var persons = []
+    // for (var i=0; i<staffOnly.length; i++)
+    // {
+    //     persons.push({
+    //         name: staffOnly[i],
+    //         wcaId: null,
+    //         registrantId: "-",
+    //         countryIso2: "AU",
+    //     })
+    // }
+
+    // Extra staff
+    var staff = true;
+    var persons = []
+    for (var i=0; i<extraStaffOnly.length; i++)
+    {
+        persons.push({
+            name: extraStaffOnly[i],
+            wcaId: null,
+            registrantId: "-",
+            countryIso2: "AU",
+        })
+    }
+    
+    
+    // Competitors only
+    // var persons = persons.filter((a) => {
+    //     if (crewNames.find((b) => {return b == a.name}) || teamLeaderNames.find((b) => {return b == a.name}))
+    //     {
+    //         return false;
+    //     }
+    //     return true;
+    // })
+
+    // Competitor crew only
+    // var persons = persons.filter((a) => {
+    //     if (crewNames.find((b) => {return b == a.name}))
+    //     {
+    //         return true;
+    //     }
+    //     return false;
+    // })
+
+    // Team leads only
+    // var persons = persons.filter((a) => {
+    //     if (teamLeaderNames.find((b) => {return b == a.name}))
+    //     {
+    //         return true;
+    //     }
+    //     return false;
+    // })
+
+    // var persons = persons.filter((a) => {
+    //     for (var b=0; b<a.assignments.length; b++)
+    //     {
+    //         if (a.assignments[b].activityId == 95 && a.assignments[b].assignmentCode == "competitor")
+    //         {
+    //             return true;
+    //         }
+    //     }
+    //     return false;
+    // })
+
+    // var persons = persons.filter((a) => {
+    //     if (a.name == "competitor")
+    //     {
+    //         return true;
+    //     }
+    //     return false;
+    // })
 
     persons.sort((a,b) => {
         if (a.wcaId == null && b.wcaId != null) {
@@ -458,9 +564,11 @@ function generate() {
         if (!template.isCertificate)
         {
             // Name badges
+            var startIndex = 0;
+            var endIndex = 800;
 
             // Keep track of pages and badges
-            var index = 0;
+            var index = startIndex;
             var badgeIndex = 0;
 
             while (true) {
@@ -470,6 +578,11 @@ function generate() {
                         break;
                     }
                     badgeIndex=0;
+                }
+
+                if (index >= endIndex)
+                {
+                    break;
                 }
         
                 // Create a new page
@@ -500,13 +613,22 @@ function generate() {
                 } else {
                     badge.find(".wca-name").text(persons[index].name);
                     if (persons[index].wcaId == null) {
-                        badge.find(".wca-id").html("<b style='color:#D00000'>NEWCOMER</b>");
+                        badge.find(".wca-id").text("");
+                        //badge.find(".wca-id").html("<b style='color:#D00000'>NEWCOMER</b>");
                     } else {
                         badge.find(".wca-id").text(persons[index].wcaId);
                     }
                     badge.find(".wca-comp-id").text(`${persons[index].registrantId}`);
-                    badge.find(".wca-country").attr("src", `https://flagcdn.com/h80/${persons[index].countryIso2.toLowerCase()}.png`);
+                    badge.find(".wca-country").attr("src", `https://flagcdn.com/${persons[index].countryIso2.toLowerCase()}.svg`);
                     badge.find(".wca-country-name").text(regionNames.of(persons[index].countryIso2.toUpperCase()));
+
+                    if (staff)
+                    {
+                        badge.find(".wca-country").attr("src", "");
+                        badge.find(".wca-country").hide();
+                        badge.find(".wca-country-name").text(" ");
+                    }
+
                     if (badge.find(".wca-events").length > 0)
                     {
                         var inEvents = new Array(eventCount).fill(false);
@@ -556,7 +678,7 @@ function generate() {
                 // If a schedule table exists, create a personal schedule for each day
                 // This object holds all assignment information per event, combining staffing and competing 
                 var personalSchedule = {}
-                if (index < persons.length && badge.find(".wca-schedule").length > 0) {
+                if (index < persons.length && badge.find(".wca-schedule").length > 0 && !staff) {
                     for (var a=0; a<persons[index].assignments.length; a++) {
                         // Check for activity information
                         var assignment = persons[index].assignments[a];
@@ -565,9 +687,10 @@ function generate() {
                             warning = `Missing activity: ${assignment.activityId}`;
                             continue;
                         }
-
-                        var startTime = moment(activity.roundStartTime).tz(activity.timezone); 
-                        var endTime = moment(activity.roundEndTime).tz(activity.timezone);
+                        
+                        var arriveTime = moment(activity.groupStartTime).subtract("minutes", 15).tz(activity.timezone); 
+                        var startTime = moment(activity.groupStartTime).tz(activity.timezone); 
+                        var endTime = moment(activity.groupEndTime).tz(activity.timezone);
                         var day = startTime.day();
 
                         // Create daily information if it doesn't exist
@@ -584,13 +707,25 @@ function generate() {
                         var event = codes[0]
                         var group = codes[2]
 
+                        if (group == undefined)
+                        {
+                            group = "g1";
+                        }
+
+                        if (assignment.assignmentCode != "competitor")
+                        {
+                            continue;
+                        }
+
                         // Create assignment for activity if it doesn't exist
                         if (personalSchedule[day].assignments[activity.parentActivityCode] == undefined) {
                             personalSchedule[day].assignments[activity.parentActivityCode] = {
-                                timeText: `${startTime.format("HH[<sup>]mm[</sup>]")} - ${endTime.format("HH[<sup>]mm[</sup>]")}`,
+                                timeText: `${startTime.format("HH:mm")} - ${endTime.format("HH:mm")}`,
+                                arriveText: `${arriveTime.format("HH:mm")}`,
                                 sortTime: startTime.unix(),
                                 eventCode: event,
                                 eventText: eventMap[event],
+                                activityCode: activity.activityCode,
                                 competing: -1,
                                 stationNumber: null,
                                 judging: [],
@@ -601,10 +736,11 @@ function generate() {
                         if (assignment.assignmentCode == "competitor") {
                             personalSchedule[day].assignments[activity.parentActivityCode].competing = group.substr(1);
                             personalSchedule[day].assignments[activity.parentActivityCode].stationNumber = assignment.stationNumber;
-                        } else if (assignment.assignmentCode == "staff-judge") {
+                        } 
+                        else if (assignment.assignmentCode == "staff-judge") {
                             personalSchedule[day].assignments[activity.parentActivityCode].judging.push(group.substr(1));
                         } else {
-                            warning = `Unhandled assignment code: ${assignment.assignmentCode}`;
+                             warning = `Unhandled assignment code: ${assignment.assignmentCode}`;
                         }
                     }
 
@@ -644,7 +780,7 @@ function generate() {
                     // Add header to schedule table
                     var table = badge.find(".wca-schedule").first();
                     var tableContent = "<tbody>";
-                    tableContent += "<tr><td>Time</td><td>Event</td><td>Group</td>"
+                    tableContent += "<tr><td>Arrive by</td><td>Time</td><td>Event</td><td>Group</td>"
                     if (settings.includeStations) {
                         tableContent += "<td>Station</td>";
                     }
@@ -656,7 +792,12 @@ function generate() {
                     // For each daily schedule
                     for (var i=0; i<sortedSchedule.length; i++) {   
                         // Add day header
-                        tableContent += `<tr><td colspan="5" class="wca-schedule-header">${ weekDaysMap[sortedSchedule[i].day]}</td></tr>`
+                        if (sortedSchedule[i].sortedAssignments.length == 0)
+                        {
+                            continue;
+                        }
+
+                        tableContent += `<tr><td colspan="6" class="wca-schedule-header">${ weekDaysMap[sortedSchedule[i].day]}</td></tr>`
 
                         // For each assignment within the day
                         for (var j=0; j<sortedSchedule[i].sortedAssignments.length; j++) {   
@@ -689,8 +830,15 @@ function generate() {
                                 competingGroup = "-";
                             }
 
+                            var roundCol = roundColors[assignment.activityCode];
+                            if (roundCol == undefined)
+                            {
+                                console.log("Missing color for " + assignment.activityCode)
+                            }
+                            var color = stageColors[roundCol];
+
                             // Add assignment to schedule
-                            tableContent += `<tr><td>${assignment.timeText}</td><td>${eventIcon} ${assignment.eventText}</td><td>${competingGroup}</td>`
+                            tableContent += `<tr style="background-color:${color};"><td>${assignment.arriveText}</td><td>${assignment.timeText}</td><td>${eventIcon} ${assignment.eventText}</td><td>${competingGroup}</td>`
                             if (settings.includeStations) {
                                 if (assignment.competing == -1) {
                                 tableContent += `<td>-</td>`;

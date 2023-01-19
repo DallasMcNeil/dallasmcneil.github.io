@@ -1,4 +1,8 @@
 <style id="badge-template-style">
+    .badge {
+        background-size: contain;
+    }
+
     .name {
         position: absolute;
         margin-left: auto;
@@ -6,12 +10,11 @@
         left: 0;
         right: 0;
         text-align: center;
-        bottom: 10.2cm;
-
+        bottom: 13.2cm;
         font-family: Bahnschrift, Arial, sans-serif;
-        font-size: 1.5cm;
-        font-weight: 700;
-        width:13.85cm;
+        font-size: 1.8cm;
+        font-weight: 500;
+        width: 19cm;
         word-wrap: break-word;
     }
 
@@ -22,19 +25,18 @@
         left: 0;
         right: 0;
         text-align: center;
-        bottom: 7.0cm; 
-
+        bottom: 13.5cm;
         font-family: Bahnschrift, Arial, sans-serif;
-        font-size: 1.1cm;
+        font-size: 0.6cm;
         font-weight: 400;
     }
 
     .country {
         border: 0.2mm solid black;
         position: absolute;
-        height: 1cm;
+        height: 2cm;
         width: auto;
-        bottom: 4cm;
+        bottom: 11cm;
         margin-left: auto;
         margin-right: auto;
         left: 0;
@@ -48,10 +50,9 @@
         left: 0;
         right: 0;
         text-align: center;
-        bottom: 2.0cm; 
-
+        bottom: 9.3cm;
         font-family: Bahnschrift, Arial, sans-serif;
-        font-size: 1.1cm;
+        font-size: 0.7cm;
         font-weight: 400;
     }
 
@@ -62,17 +63,16 @@
         left: 0;
         right: 0;
         text-align: center;
-        bottom: 0.0cm; 
-
+        bottom: 6.7cm;
         font-family: Arial, sans-serif;
-        font-size: 1.1cm;
+        font-size: 1.0cm;
         font-weight: 400;
     }
 
 </style>
 
 <div id="badge-template">
-    <div class="print-badge badge">
+    <div class="print-badge badge background-image">
         <p class="wca-name name">Name</p>
         <p class="wca-id id">WCAID</p>
         <p class="wca-country-name country-name">Country</p>

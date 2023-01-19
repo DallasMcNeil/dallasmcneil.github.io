@@ -22,6 +22,6 @@ function fitText(textElem, lines) {
 // Fit all name elements in name badges
 function fixNameText() {
     $("body").find(".wca-name").each(function() {
-        fitText($(this), 2);
+        fitText($(this), 1.5);
     });
 }

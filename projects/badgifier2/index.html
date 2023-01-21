@@ -1,0 +1,82 @@
+---
+title: Badgifier
+---
+<!DOCTYPE html>	
+<head>
+    {% include head.html %}
+    
+    <link rel="stylesheet" type="text/css" href="./style.css">
+    <link rel="stylesheet" type="text/css" href="./lib/cubingIcons.css">
+</head>
+<body>
+
+{% include header.html %}
+    
+{% include mainImage.html image="/images/headings/badgifier.jpeg" text="Badgifier" %}
+    
+<div class="container shadow">
+    <div class="row">
+        <div class="col-12 content">
+            <h2>Badgifier generates customisable name badges, personal schedules and certificates for WCA competitions</h2>
+
+            <h3>Instructions</h3>            
+            <p>1. Add competition data <input onchange="ReadWCIF(this)" type="file"><br>
+                You should use <a link="https://groupifier.jonatanklosko.com/">Groupifier</a> to generate groups first.<br>
+                Then get your WCIF file from <code>https://www.worldcubeassociation.org/api/v0/competitions/YourCompetitionID/wcif/</code><br>
+                Replace <code>YourCompetitionID</code> with your competition's name</p>
+            <p>2. Select template <select id="select-template" onchange="templateChanged(this)"></select> <span id="template-description"></span></p>
+            <p>3. Adjust settings</p>
+            <ul>
+                <li>Set background image <input onchange="ReadBackgroundImage(this)" type="file"></li>
+                <li>Set organization image <input onchange="ReadOrganizationImage(this)" type="file"></li>
+                <li class="badge-only"><input type="checkbox" checked onclick="settings.includeStations = this.checked"> Include stations in schedules</li>
+                <li class="badge-only"><input type="checkbox" checked onclick="settings.includeStaffing = this.checked"> Include staffing in schedules</li>
+                <li class="badge-only"><input type="checkbox" onclick="settings.hideStaffOnlyAssignments = this.checked"> Hide staff only assignments in schedule</li>
+                <li class="badge-only"><input type="checkbox" checked onclick="settings.showWcaLiveQrCode = this.checked"> Include WCA Live QR code with schedules (Not recommended for competitions with many events)</li>
+                <li class="certificate-only">Background color tint <input type="text" value="#006400" onchange="settings.certBorderTint = this.value"></input></li>
+                <li class="certificate-only">Text color <input type="text" value="#006400" onchange="settings.certTextColor = this.value"></input></li>
+                <li class="certificate-only">Page color <input type="text" value="#dfefdf" onchange="settings.certPageColor = this.value"></input></li>
+                <li class="certificate-only">Signature name for certificate <input type="text" value="Name" onchange="settings.certOrganiser = this.value"></input></li>
+                <li class="certificate-only">Signature role for certificate <input type="text" value="WCA DELEGATE" onchange="settings.certRole = this.value"></input></li>
+            </ul> 
+            <p>4. 'Generate' and preview the document. Adjust settings as needed and 'Generate' again. Large documents may not preview but are generated.</p>
+            <p>5. 'Print' to download the PDF document.</p>
+
+
+            <button onclick="GenerateDocument()">Generate</button>
+            <button id="print-button" onclick="PrintDocument()" disabled>Print</button>
+            <p id="status" class="info"></p>
+
+            <div id="print-document" style="display:none;"></div>
+
+            <embed id="document-preview" src="" type="application/pdf">
+
+            <div id="template"></div>
+
+            <p>Version 2.0.0</p>
+
+            <div id="hidden-images">
+                <img style="display: none;" id="org-img" src="./images/sca.png"/>
+                <img style="display: none;" id="org-large-img" src="./images/sca-large.png"/>
+                <img style="display: none;" id="wca-img" src="./images/wca.png"/>
+                <img style="display: none;" id="wca-large-img" src="./images/wca-large.png"/>
+                <img style="display: none;" id="background-img" src="./images/badge-a4-3x3-default.png"/>
+                <img style="display: none;" id="wca-live-qrcode-img" src="./images/wca-live-qrcode.png"/>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include footer.html %}
+
+<script src="./lib/moment.js"></script>
+<script src="./lib/moment.tz.js"></script>
+<script src="./lib/PDFjs.umd.min.js"></script>
+<script src="./lib/NotoSans-Regular-normal.js"></script>
+<script src="./lib/NotoSans-Bold-normal.js"></script>
+<script src="./lib/cubing-icons-normal.js"></script>
+<script src="./constants.js"></script>
+<script src="./generators.js"></script>
+<script src="./main.js"></script>
+
+</body>

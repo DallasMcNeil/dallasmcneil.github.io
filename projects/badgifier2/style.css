@@ -1,0 +1,42 @@
+/* Documents */
+
+#document-preview {
+    width: 90%;
+    margin-left: 5%;
+    display:block;
+    height: 900px;
+}
+
+/* Page classes */
+
+.print-page {
+    position: relative;
+    margin: 0mm 0mm 0mm 0mm;
+    padding: 0mm 0mm 0mm 0mm;
+}
+
+/* Badge classes */
+
+.print-badge {
+    position: absolute;
+    top: 0cm;
+    left: 0cm;
+    margin: 0mm 0mm 0mm 0mm;
+    padding: 0mm 0mm 0mm 0mm;
+}
+
+#status {
+    font-size: 20px;
+}
+
+#status.info {
+    color: #00c0ff;
+}
+
+#status.warn {
+    color: #ffd500;
+}
+
+#status.error {
+    color: #ff0000;
+}

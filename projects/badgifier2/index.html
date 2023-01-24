@@ -29,6 +29,7 @@ title: Badgifier
             <ul>
                 <li>Set background image <input onchange="ReadBackgroundImage(this)" type="file"></li>
                 <li>Set organization image <input onchange="ReadOrganizationImage(this)" type="file"></li>
+                <li class="badge-only"><input type="checkbox" onclick="settings.includeLocalName = this.checked"> Include local names</li>
                 <li class="badge-only"><input type="checkbox" checked onclick="settings.includeStations = this.checked"> Include stations in schedules</li>
                 <li class="badge-only"><input type="checkbox" checked onclick="settings.includeStaffing = this.checked"> Include staffing in schedules</li>
                 <li class="badge-only"><input type="checkbox" onclick="settings.hideStaffOnlyAssignments = this.checked"> Hide staff only assignments in schedule</li>

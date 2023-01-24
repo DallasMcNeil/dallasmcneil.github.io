@@ -15,12 +15,12 @@ var doc;
 // align specifies if text should be left aligned or centred within box
 function DrawName(text, align, x, y, w, h) {
     // Determine names
-    const [, latinName, localName] = text.match(/(.+)\s*[(（](.+)[)）]/) || [null, name, null];
+    const [, latinName, localName] = text.match(/(.+)\s*[(（](.+)[)）]/) || [null, text, null];
 
     var fontSize = h*2.2
     doc.saveGraphicsState();
 
-    if (localName) {
+    if (localName && settings.includeLocalNames) {
         // Need to handle special local name
         var localFont = DetermineFont(localName)
         console.log(`Local name ${localName} with font ${localFont}`)
@@ -64,14 +64,14 @@ function DrawName(text, align, x, y, w, h) {
         // Just latin text to be drawn
         doc.setFont("NotoSans-Bold")
         doc.setFontSize(fontSize);
-        var textWidth = doc.getTextWidth(text);
+        var textWidth = doc.getTextWidth(latinName);
         var horizontalScale = Math.min(1, w / textWidth);
         if (horizontalScale == 1 && align == "center") {
-            doc.text(text, (w/2) + x, y, {
+            doc.text(latinName, (w/2) + x, y, {
                 align:"center"
             });
         } else {
-            doc.text(text, x, y, {
+            doc.text(latinName, x, y, {
                 align:"left",
                 horizontalScale: horizontalScale,
             });

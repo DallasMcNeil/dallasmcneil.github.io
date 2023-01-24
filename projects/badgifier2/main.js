@@ -1,89 +1,81 @@
 
 var templates = [
-    {
-        name: "Basic 3x3",
-        description: "3 rows of 3 badges for printing on a landscape A4 page, no schedule",
-        link: "./templates/Standard-basic.html",
-        isCertificate: false,
-        pageWidth: 29.7,
-        pageHeight: 21,
-        pageRows: 3,
-        pageColumns: 3,
-        badgeWidth: 9.9,
-        badgeHeight: 7,
-        badgeScale: 1.0,
-    },
-    {
-        name: "Book",
-        description: "Individual portrait badge and schedule for printing on a single landscape A6 page",
-        link: "./templates/Standard-book.html",
-        isCertificate: false,
-        pageWidth: 29.7,
-        pageHeight: 21,
-        pageRows: 1,
-        pageColumns: 1,
-        badgeWidth: 29.7,
-        badgeHeight: 21,
-        badgeScale: 1.0,
-    },
-    {
-        name: "Book 2x2",
-        description: "2 rows of 2 columns of portrait badges and schedule for printing on a landscape A4 page",
-        link: "./templates/Standard-book.html",
-        isCertificate: false,
-        pageWidth: 29.7,
-        pageHeight: 21,
-        pageRows: 2,
-        pageColumns: 2,
-        badgeWidth: 29.7,
-        badgeHeight: 21,
-        badgeScale: 0.5,
-    },
+    // {
+    //     name: "Basic 3x3",
+    //     description: "3 rows of 3 badges for printing on a landscape A4 page, no schedule",
+    //     link: "./templates/Standard-basic.html",
+    //     isCertificate: false,
+    //     pageWidth: 29.7,
+    //     pageHeight: 21,
+    //     pageRows: 3,
+    //     pageColumns: 3,
+    //     badgeWidth: 9.9,
+    //     badgeHeight: 7,
+    //     badgeScale: 1.0,
+    // },
+    // {
+    //     name: "Book",
+    //     description: "Individual portrait badge and schedule for printing on a single landscape A6 page",
+    //     link: "./templates/Standard-book.html",
+    //     isCertificate: false,
+    //     pageWidth: 29.7,
+    //     pageHeight: 21,
+    //     pageRows: 1,
+    //     pageColumns: 1,
+    //     badgeWidth: 29.7,
+    //     badgeHeight: 21,
+    //     badgeScale: 1.0,
+    // },
+    // {
+    //     name: "Book 2x2",
+    //     description: "2 rows of 2 columns of portrait badges and schedule for printing on a landscape A4 page",
+    //     link: "./templates/Standard-book.html",
+    //     isCertificate: false,
+    //     pageWidth: 29.7,
+    //     pageHeight: 21,
+    //     pageRows: 2,
+    //     pageColumns: 2,
+    //     badgeWidth: 29.7,
+    //     badgeHeight: 21,
+    //     badgeScale: 0.5,
+    // },
     {
         name: "Landscape Book",
         description: "Individual landscape badge and schedule for printing on a single landscape A6 page",
-        link: "./templates/Standard-book-landscape.html",
         isCertificate: false,
-        pageWidth: 29.7,
-        pageHeight: 21,
-        pageRows: 1,
-        pageColumns: 1,
-        badgeWidth: 29.7,
-        badgeHeight: 21,
-        badgeScale: 1.0,
     },
-    {
-        name: "Landscape Book 2x2",
-        description: "2 rows of 2 columns of landscape badges and schedule for printing on a landscape A4 page",
-        link: "./templates/Standard-book-landscape.html",
-        isCertificate: false,
-        pageWidth: 29.7,
-        pageHeight: 21,
-        pageRows: 2,
-        pageColumns: 2,
-        badgeWidth: 29.7,
-        badgeHeight: 21,
-        badgeScale: 0.5,
-    },
-    {
-        name: "Certificate",
-        description: "Landscape certificates for all events",
-        link: "./templates/Standard-certificate.html",
-        isCertificate: true,
-        pageWidth: 29.7,
-        pageHeight: 21,
-        pageRows: 1,
-        pageColumns: 1,
-        badgeWidth: 29.7,
-        badgeHeight: 21,
-        badgeScale: 1.0,
-    },
+    // {
+    //     name: "Landscape Book 2x2",
+    //     description: "2 rows of 2 columns of landscape badges and schedule for printing on a landscape A4 page",
+    //     link: "./templates/Standard-book-landscape.html",
+    //     isCertificate: false,
+    //     pageWidth: 29.7,
+    //     pageHeight: 21,
+    //     pageRows: 2,
+    //     pageColumns: 2,
+    //     badgeWidth: 29.7,
+    //     badgeHeight: 21,
+    //     badgeScale: 0.5,
+    // },
+    // {
+    //     name: "Certificate",
+    //     description: "Landscape certificates for all events",
+    //     link: "./templates/Standard-certificate.html",
+    //     isCertificate: true,
+    //     pageWidth: 29.7,
+    //     pageHeight: 21,
+    //     pageRows: 1,
+    //     pageColumns: 1,
+    //     badgeWidth: 29.7,
+    //     badgeHeight: 21,
+    //     badgeScale: 1.0,
+    // },
 ]
 
 // Settings
 var settings = {
     // General settings
-    template: 3,
+    template: 0,
     // Badge settings
     includeStaffing: true,
     includeStations: true,
@@ -230,15 +222,19 @@ function ReadOrganizationImage(input) {
 function GenerateDocument() {
     SetStatus("Generating PDF...", STATUS_MODE_INFO);
     setTimeout(() => {
-        var error = !MakeDocument();
-        if (!error) {
-            // Allow document to be printed
-            $("#print-button").prop("disabled", false);
+        try {
+            var error = !MakeDocument();
+            if (!error) {
+                // Allow document to be printed
+                $("#print-button").prop("disabled", false);
 
-            var out = doc.output("datauristring")
-            $("#document-preview").attr("src", out)
-            
-            SetStatus("PDF ready!", STATUS_MODE_INFO);
+                var out = doc.output("datauristring")
+                $("#document-preview").attr("src", out)
+                
+                SetStatus("PDF ready!", STATUS_MODE_INFO);
+            }
+        } catch {
+            SetStatus("PDF failed to generate", STATUS_MODE_ERROR);
         }
     }, 0);
 }
@@ -248,5 +244,24 @@ function PrintDocument() {
 }
 
 $(document).ready(function () {
+    // Setup template dropdown
+    var option = '';
+    for (var i=0;i<templates.length;i++) {
+        if (!templates[i].isCertificate) {
+            option += '<option value="' + i + '">' + templates[i].name + '</option>';
+        }
+    }
+    option += '<option disabled>──────────</option>'
+    for (var i=0;i<templates.length;i++) {
+        if (templates[i].isCertificate) {
+            option += '<option value="' + i + '">' + templates[i].name + '</option>';
+        }
+    }
+    $('#select-template').html(option);
+    $('#select-template').val(String(settings.template));
+    $("#template-description").text(templates[settings.template].description);
 
+    $(".certificate-only").hide();
+
+    $("#document-preview").hide();
 });

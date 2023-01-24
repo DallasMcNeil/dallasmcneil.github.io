@@ -32,7 +32,7 @@ title: Badgifier
                 <li class="badge-only"><input type="checkbox" checked onclick="settings.includeStations = this.checked"> Include stations in schedules</li>
                 <li class="badge-only"><input type="checkbox" checked onclick="settings.includeStaffing = this.checked"> Include staffing in schedules</li>
                 <li class="badge-only"><input type="checkbox" onclick="settings.hideStaffOnlyAssignments = this.checked"> Hide staff only assignments in schedule</li>
-                <li class="badge-only"><input type="checkbox" checked onclick="settings.showWcaLiveQrCode = this.checked"> Include WCA Live QR code with schedules (Not recommended for competitions with many events)</li>
+                <li class="badge-only"><input type="checkbox" checked onclick="settings.showWcaLiveQrCode = this.checked"> Include WCA Live QR code with schedules</li>
                 <li class="certificate-only">Background color tint <input type="text" value="#006400" onchange="settings.certBorderTint = this.value"></input></li>
                 <li class="certificate-only">Text color <input type="text" value="#006400" onchange="settings.certTextColor = this.value"></input></li>
                 <li class="certificate-only">Page color <input type="text" value="#dfefdf" onchange="settings.certPageColor = this.value"></input></li>
@@ -72,9 +72,17 @@ title: Badgifier
 <script src="./lib/moment.js"></script>
 <script src="./lib/moment.tz.js"></script>
 <script src="./lib/PDFjs.umd.min.js"></script>
+
 <script src="./lib/NotoSans-Regular-normal.js"></script>
 <script src="./lib/NotoSans-Bold-normal.js"></script>
+<script src="./lib/NotoSansArabic-normal.js"></script>
+<script src="./lib/NotoSansArmenian-normal.js"></script>
+<script src="./lib/NotoSansGeorgian-normal.js"></script>
+<script src="./lib/NotoSansThai-normal.js"></script>
+<script src="./lib/WenQuanYiZenHei-normal.js"></script>
 <script src="./lib/cubing-icons-normal.js"></script>
+
+<script src="./utils.js"></script>
 <script src="./constants.js"></script>
 <script src="./generators.js"></script>
 <script src="./main.js"></script>

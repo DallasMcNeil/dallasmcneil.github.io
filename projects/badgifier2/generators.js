@@ -9,15 +9,92 @@ const A7P_HEIGHT = 105
 // PDF document
 var doc;
 
-function DrawTextBox(text, align, x, y, w, h, fillColor=[255,255,255], icon="") {
-    // Empty square
+// Draw a name with support for non-latin unicode characters in brackets
+// e.g text = "Latin Name (LocalName)"
+// x,y,w,h specifies box for text to be located in
+// align specifies if text should be left aligned or centred within box
+function DrawName(text, align, x, y, w, h) {
+    // Determine names
+    const [, latinName, localName] = text.match(/(.+)\s*[(（](.+)[)）]/) || [null, name, null];
+
+    var fontSize = h*2.2
     doc.saveGraphicsState();
-    
+
+    if (localName) {
+        // Need to handle special local name
+        var localFont = DetermineFont(localName)
+        console.log(`Local name ${localName} with font ${localFont}`)
+
+        // Find lengths of all text componenets
+        doc.setFont("NotoSans-Bold")
+        doc.setFontSize(fontSize);
+        var length1 = doc.getTextWidth(`${latinName} (`);
+        var length3 = doc.getTextWidth(`)`);
+
+        doc.setFont(localFont)
+        var length2 = doc.getTextWidth(`${localName}`);
+        
+        // Padding required if text will be centred within box
+        var xPadding = Math.max(0, (w - (length1 + length2 + length3)) / 2)
+        if (align == "left") {
+            xPadding = 0;
+        }
+
+        // Horizontal scaling required to fit within box
+        var horizontalScale = Math.min(1, w / (length1 + length2 + length3));
+
+        // Draw text components
+        doc.setFont("NotoSans-Bold")
+        doc.text(`${latinName} (`, x + xPadding, y, {
+            align:"left",
+            horizontalScale: horizontalScale,
+        });
+        doc.text(`)`, x + xPadding + ((length1 + length2) * horizontalScale), y, {
+            align:"left",
+            horizontalScale: horizontalScale,
+        });
+        
+        doc.setFont(localFont)
+        doc.text(`${localName}`, x + xPadding + (length1 * horizontalScale), y, {
+            align:"left",
+            horizontalScale: horizontalScale,
+        });
+
+    } else {
+        // Just latin text to be drawn
+        doc.setFont("NotoSans-Bold")
+        doc.setFontSize(fontSize);
+        var textWidth = doc.getTextWidth(text);
+        var horizontalScale = Math.min(1, w / textWidth);
+        if (horizontalScale == 1 && align == "center") {
+            doc.text(text, (w/2) + x, y, {
+                align:"center"
+            });
+        } else {
+            doc.text(text, x, y, {
+                align:"left",
+                horizontalScale: horizontalScale,
+            });
+        }
+    }
+    doc.restoreGraphicsState();
+}
+
+// Draw a box with text in it
+// x,y,w,h specifies box
+// align specifies if text should be left aligned or centred within box
+// fillColor is an optional fill color in box
+// icon is an optional WCA event code that will be drawn in left of box
+function DrawTextBox(text, align, x, y, w, h, fillColor=[255,255,255], icon="") {
+    doc.saveGraphicsState();
+
+    // Draw box
     doc.setLineWidth(0.1);
     doc.setDrawColor(128,128,128);
     doc.setFillColor(fillColor[0], fillColor[1], fillColor[2]);
     doc.rect(x,y,w,h, "FD");
 
+    // Determine spacing for text
     var fontSize = h * 2.2;
     var xPadding = h*0.1;
     var yPadding = h*0.78;
@@ -27,6 +104,7 @@ function DrawTextBox(text, align, x, y, w, h, fillColor=[255,255,255], icon="") 
         xPadding += h*1
     }
 
+    // Draw the text
     doc.setFontSize(fontSize);
     var textWidth = doc.getTextWidth(text) + (xPadding*2);
     var horizontalScale = Math.min(1, w / textWidth);
@@ -42,6 +120,7 @@ function DrawTextBox(text, align, x, y, w, h, fillColor=[255,255,255], icon="") 
         });
     }
 
+    // Draw the icon
     if (icon != "") {
         doc.setFont("cubing-icons")
         doc.text(eventCharacters[icon], x + xPaddingIcon, y + yPaddingIcon, {
@@ -53,6 +132,7 @@ function DrawTextBox(text, align, x, y, w, h, fillColor=[255,255,255], icon="") 
     doc.restoreGraphicsState();
 }
 
+// Draws an entire A6 landscape name badge
 function AddLandscapeNameBadge(index) {
     // ============================
     // Information about competitor
@@ -62,13 +142,6 @@ function AddLandscapeNameBadge(index) {
     var wcaid = persons[index].wcaId;
     var compid = persons[index].registrantId;
     var countryCode = persons[index].countryIso2.toLowerCase();
-
-    // Remove anything in brackets at the end
-    // These contain characters we can't easily render in a PDF
-    // In future we could detect which characters are in the brackets, load an appropriate font
-    // and draw the name on the front of the badge
-    name = name.split('(')[0]
-    name = name.trim();
 
     // If a schedule table exists, create a personal schedule for each day
     // This object holds all assignment information per event, combining staffing and competing 
@@ -160,14 +233,6 @@ function AddLandscapeNameBadge(index) {
     // ============
     // Create badge
     // ============
-
-    // Centre divide line
-    doc.saveGraphicsState();
-    doc.setLineWidth(0.25);
-    doc.setLineDash([1]);
-    doc.setDrawColor(128, 128, 128);
-    doc.line(A6L_WIDTH / 2, 0, A6L_WIDTH / 2, A6L_HEIGHT);
-    doc.restoreGraphicsState();
     
     // Front name side
     {
@@ -183,22 +248,7 @@ function AddLandscapeNameBadge(index) {
         doc.addImage($("#background-img")[0], "PNG", 0, 0, A7L_WIDTH, A7L_WIDTH * backgroundRatio, "background", "SLOW");
 
         // Place name, starting from bottom and adding extra lines on top for longer names
-        doc.saveGraphicsState();
-        doc.setFont("NotoSans-Bold")
-        doc.setFontSize(20);
-        var textWidth = doc.getTextWidth(name);
-        var horizontalScale = Math.min(1, (A7L_WIDTH - 10) / textWidth);
-        if (horizontalScale == 1) {
-            doc.text(name, A7L_WIDTH/2, 56, {
-                align:"center"
-            });
-        } else {
-            doc.text(name, 5, 56, {
-                align:"left",
-                horizontalScale: horizontalScale,
-            });
-        }
-        doc.restoreGraphicsState();
+        DrawName(name, "center", 5, 57, A7L_WIDTH - 10, 10)
 
         doc.setLineWidth(0.25);
         doc.setDrawColor(0,0,0);
@@ -239,16 +289,7 @@ function AddLandscapeNameBadge(index) {
 
     {
         // Place name
-        doc.saveGraphicsState();
-        doc.setFont("NotoSans-Bold")
-        doc.setFontSize(10);
-        var textWidth = doc.getTextWidth(name);
-        var horizontalScale = Math.min(1, (A7P_WIDTH - 12) / textWidth);
-        doc.text(name, 3, 7, {
-            align:"left",
-            horizontalScale: horizontalScale,
-        });
-        doc.restoreGraphicsState();
+        DrawName(name, "left", 3, 7, A7P_WIDTH - 12, 4)
         
         // Place registration id
         doc.setFont("NotoSans-Regular")
@@ -383,8 +424,15 @@ function AddLandscapeNameBadge(index) {
             }    
         }
     }
+    
+    // Centre divide line
+    doc.saveGraphicsState();
+    doc.setLineWidth(0.25);
+    doc.setLineDash([1]);
+    doc.setDrawColor(128, 128, 128);
+    doc.line(A6L_WIDTH / 2, 0, A6L_WIDTH / 2, A6L_HEIGHT);
+    doc.restoreGraphicsState();
 }
-
 
 var persons;
 function MakeDocument() {
@@ -438,8 +486,7 @@ function MakeDocument() {
     // Show a warning if anything is wrong
     var warning = "";
     
-    if (!template.isCertificate)
-    {
+    if (!template.isCertificate) {
         // Name badges
         doc = new jspdf.jsPDF({
             orientation: 'l',
@@ -449,25 +496,20 @@ function MakeDocument() {
 
         // Keep track of pages and badges
         var index = 0;
-        var badgeIndex = 0;
-
         while (true) {
-            // New page required
-            if (badgeIndex >= (template.pageRows * template.pageColumns)) {
-                if (index >= persons.length) {
-                    break;
-                }
-                badgeIndex=0;
+            if (index >= persons.length)
+            {
+                break;
             }
-    
+
             // Create a new page
-            if (badgeIndex == 0 && index != 0) {
+            if (index != 0) {
                 doc.addPage("a6", "l");
             }
             
+            // Add badge
             AddLandscapeNameBadge(index);
 
-            badgeIndex+=1;
             index+=1;
         }
     } else {

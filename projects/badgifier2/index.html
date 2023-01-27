@@ -24,7 +24,7 @@ title: Badgifier
                 You should use <a link="https://groupifier.jonatanklosko.com/">Groupifier</a> to generate groups first.<br>
                 Then get your WCIF file from <code>https://www.worldcubeassociation.org/api/v0/competitions/YourCompetitionID/wcif/</code><br>
                 Replace <code>YourCompetitionID</code> with your competition's name</p>
-            <p>2. Select template <select id="select-template" onchange="templateChanged(this)"></select> <span id="template-description"></span></p>
+            <p>2. Select template <select id="select-template" onchange="TemplateChanged(this)"></select> <span id="template-description"></span></p>
             <p>3. Adjust settings</p>
             <ul>
                 <li>Set background image <input onchange="ReadBackgroundImage(this)" type="file"></li>
@@ -82,6 +82,8 @@ title: Badgifier
 <script src="./lib/NotoSansThai-normal.js"></script>
 <script src="./lib/WenQuanYiZenHei-normal.js"></script>
 <script src="./lib/cubing-icons-normal.js"></script>
+
+<script src="./images/cert-border.js"></script>
 
 <script src="./utils.js"></script>
 <script src="./constants.js"></script>

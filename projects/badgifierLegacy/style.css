@@ -1,10 +1,15 @@
 /* Documents */
 
+#print-document {
+    margin: 0mm 0mm 0mm 0mm;
+    padding: 0mm 0mm 0mm 0mm;  
+}
+
 #document-preview {
     width: 90%;
     margin-left: 5%;
-    display:block;
-    height: 900px;
+    overflow: scroll;
+    background-color:white;
 }
 
 /* Page classes */

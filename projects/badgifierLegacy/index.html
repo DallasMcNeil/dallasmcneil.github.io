@@ -1,0 +1,78 @@
+---
+title: Badgifier
+---
+<!DOCTYPE html>	
+<head>
+    {% include head.html %}
+    
+    <link rel="stylesheet" type="text/css" href="./style.css">
+    <link rel="stylesheet" type="text/css" href="./cubingIcons.css">
+</head>
+<body>
+
+{% include header.html %}
+    
+{% include mainImage.html image="/images/headings/badgifier.jpeg" text="Badgifier (Legacy)" %}
+    
+<div class="container shadow">
+    <div class="row">
+        <div class="col-12 content">
+            <h2>Badgifier generates customisable name badges, personal schedules and certificates for WCA competitions</h2>
+
+            <h3>Instructions</h3>            
+            <p>1. Add competition data <input onchange="readWCIF(this)" type="file"><br>
+                You should use <a link="https://groupifier.jonatanklosko.com/">Groupifier</a> to generate groups first.<br>
+                Then get your WCIF file from <code>https://www.worldcubeassociation.org/api/v0/competitions/YourCompetitionID/wcif/</code><br>
+                Replace <code>YourCompetitionID</code> with your competition's name</p>
+            <p>2. Select template <select id="select-template" onchange="templateChanged(this)"></select> <span id="template-description"></span></p>
+            <p>3. Adjust settings</p>
+            <ul>
+                <li>Set background image <input onchange="readBackgroundImage(this)" type="file"></li>
+                <li>Set organization image <input onchange="readOrganizationImage(this)" type="file"></li>
+                <li>Page margins <input type="range" min="0" max="20" value="3" oninput="settings.marginPercentage = (this.value/100);$('#margin-value').text(this.value)"> <span id="margin-value">3</span>%</li>
+                <li class="badge-only"><input type="checkbox" checked onclick="settings.includeStations = this.checked"> Include stations in schedules</li>
+                <li class="badge-only"><input type="checkbox" checked onclick="settings.includeStaffing = this.checked"> Include staffing in schedules</li>
+                <li class="badge-only"><input type="checkbox" onclick="settings.hideStaffOnlyAssignments = this.checked"> Hide staff only assignments in schedule</li>
+                <li class="badge-only"><input type="checkbox" checked onclick="settings.showWcaLiveQrCode = this.checked"> Include WCA Live QR code with schedules (Not recommended for competitions with many events)</li>
+                <li class="certificate-only">Background color tint <input type="text" value="#006400" onchange="settings.certBorderTint = this.value"></input></li>
+                <li class="certificate-only">Text color <input type="text" value="#006400" onchange="settings.certTextColor = this.value"></input></li>
+                <li class="certificate-only">Page color <input type="text" value="#dfefdf" onchange="settings.certPageColor = this.value"></input></li>
+                <li class="certificate-only">Signature name for certificate <input type="text" value="Name" onchange="settings.certOrganiser = this.value"></input></li>
+                <li class="certificate-only">Signature role for certificate <input type="text" value="WCA DELEGATE" onchange="settings.certRole = this.value"></input></li>
+            </ul> 
+            <p>4. 'Generate' and preview the document. Adjust settings as needed and 'Generate' again</p>
+            <p>5. 'Print' when ready and use these settings in the print dialog</p>
+            <ul>
+                <li>Layout: Landscape</li>
+                <li>More Settings
+                <ul>
+                    <li>Paper Size: A4</li>
+                    <li>Margins: None</li>
+                    <li>Background Graphics: On</li>
+                </ul> 
+                </li>
+            </ul> 
+
+            <button onclick="generate()">Generate</button>
+            <button id="print-button" onclick="print()" disabled>Print</button>
+            <p id="status" class="info"></p>
+
+            <div id="print-document" style="display:none;"></div>
+
+            <iframe id="document-preview" style="display:none;">
+            </iframe>
+
+            <div id="template"></div>
+
+            <p>Version 1.2.0</p>
+        </div>
+    </div>
+</div>
+
+{% include footer.html %}
+
+<script src="./moment.js"></script>
+<script src="./moment.tz.js"></script>
+<script src="./main.js"></script>
+
+</body>

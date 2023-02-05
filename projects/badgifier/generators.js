@@ -134,7 +134,7 @@ function DrawTextBox(doc, text, align, x, y, w, h, fillColor=[255,255,255], icon
 }
 
 // Draws an entire A6 landscape name badge
-function AddLandscapeNameBadge(doc, index, tx = 0, ty = 0) {
+function AddLandscapeNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
     // ============================
     // Information about competitor
     // ============================
@@ -247,9 +247,13 @@ function AddLandscapeNameBadge(doc, index, tx = 0, ty = 0) {
         doc.saveGraphicsState();
 
         // Translate so we are in a landscape A7 space to layout name side
-        doc.setCurrentTransformationMatrix(new doc.Matrix(1, 0, 0, 1, MMtoPDF(tx), MMtoPDF(ty)));
-        doc.setCurrentTransformationMatrix(new doc.Matrix(0, -1, 1, 0, 0, 0));
-        doc.setCurrentTransformationMatrix(new doc.Matrix(1, 0, 0, 1, MMtoPDF(-A7L_WIDTH*2), MMtoPDF(-61.5)));
+        if (isA4) {
+            doc.setCurrentTransformationMatrix(new doc.Matrix(1, 0, 0, 1, MMtoPDF(tx), MMtoPDF(ty)));
+            doc.setCurrentTransformationMatrix(new doc.Matrix(0, -1, 1, 0, 0, 0));
+            doc.setCurrentTransformationMatrix(new doc.Matrix(1, 0, 0, 1, MMtoPDF(-A7L_WIDTH*2), MMtoPDF(-61.5)));
+        } else {
+            doc.setCurrentTransformationMatrix(new doc.Matrix(0,-1, 1, 0, 121.3, A6L_WIDTH*2));
+        }
         
         // Add background
         var backgroundRatio = $("#background-img").height() / $("#background-img").width();
@@ -627,7 +631,7 @@ function MakeA6LandscapeBadges() {
         }
         
         // Add badge
-        AddLandscapeNameBadge(globalDoc, index);
+        AddLandscapeNameBadge(globalDoc, index, 0, 0);
 
         index+=1;
     }
@@ -674,7 +678,7 @@ function MakeA4LandscapeBadges() {
 
         // Add badge
         // Translate badge to different spot
-        AddLandscapeNameBadge(globalDoc, index, (index & 0x1) * A4L_WIDTH/2, (index & 0x2) * -A4L_HEIGHT/4);
+        AddLandscapeNameBadge(globalDoc, index, true, (index & 0x1) * A4L_WIDTH/2, (index & 0x2) * -A4L_HEIGHT/4);
 
         globalDoc.restoreGraphicsState();
 

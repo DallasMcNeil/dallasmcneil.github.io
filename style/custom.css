@@ -9319,4 +9319,13 @@ h1 {
   color: #1a4374 !important;
 }
 
+.card {
+  background-color: #4a4c50;
+  margin-bottom: 15px;
+}
+
+hr {
+  background-color: #ffffff;
+}
+
 /*# sourceMappingURL=custom.css.map */

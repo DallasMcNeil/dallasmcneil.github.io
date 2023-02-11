@@ -19,49 +19,140 @@ title: Badgifier
         <div class="col-12 content">
             <h2>Badgifier generates customisable name badges, personal schedules and certificates for WCA competitions</h2>
 
-            <h3>Instructions</h3>            
-            <p>1. Add competition data <input onchange="ReadWCIF(this)" type="file"><br>
-                You should use <a link="https://groupifier.jonatanklosko.com/">Groupifier</a> to generate groups first.<br>
-                Then get your WCIF file from <code>https://www.worldcubeassociation.org/api/v0/competitions/YourCompetitionID/wcif/</code><br>
-                Replace <code>YourCompetitionID</code> with your competition's name</p>
-            <p>2. Select template <select id="select-template" onchange="TemplateChanged(this)"></select> <span id="template-description"></span></p>
-            <p>3. Adjust settings</p>
-            <ul>
-                <li>Set background image <input onchange="ReadBackgroundImage(this)" type="file"></li>
-                <li>Set organization image <input onchange="ReadOrganizationImage(this)" type="file"></li>
-                <li class="badge-only"><input type="checkbox" onclick="settings.includeLocalName = this.checked"> Include local names</li>
-                <li class="badge-only"><input type="checkbox" checked onclick="settings.includeStations = this.checked"> Include stations in schedules</li>
-                <li class="badge-only"><input type="checkbox" checked onclick="settings.includeStaffing = this.checked"> Include staffing in schedules</li>
-                <li class="badge-only"><input type="checkbox" onclick="settings.hideStaffOnlyAssignments = this.checked"> Hide staff only assignments in schedule</li>
-                <li class="badge-only"><input type="checkbox" checked onclick="settings.showWcaLiveQrCode = this.checked"> Include WCA Live QR code with schedules</li>
-                <li class="certificate-only">Background color tint <input type="text" value="#006400" onchange="settings.certBorderTint = this.value"></input></li>
-                <li class="certificate-only">Text color <input type="text" value="#006400" onchange="settings.certTextColor = this.value"></input></li>
-                <li class="certificate-only">Page color <input type="text" value="#dfefdf" onchange="settings.certPageColor = this.value"></input></li>
-                <li class="certificate-only">Signature name for certificate <input type="text" value="Name" onchange="settings.certOrganiser = this.value"></input></li>
-                <li class="certificate-only">Signature role for certificate <input type="text" value="WCA DELEGATE" onchange="settings.certRole = this.value"></input></li>
-            </ul> 
-            <p>4. 'Generate' and preview the document. Adjust settings as needed and 'Generate' again. Large documents may not preview but are generated.</p>
-            <p>5. 'Print' to download the PDF document.</p>
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Competition Data</h4>
+                    <p><strong>Provide information about the competition</strong></p>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text">Upload WCIF</span>
+                        </div>
+                        <div class="custom-file">
+                          <input type="file" class="custom-file-input" id="wcifFile" onchange="ReadWCIF(this)">
+                          <label class="custom-file-label" id="wcifFileLabel" for="wcifFile">Choose file...</label>
+                        </div>
+                    </div>
+                    <p>
+                        You should use <a link="https://groupifier.jonatanklosko.com/">Groupifier</a> to generate groups first. 
+                    </p>
+                    <p>
+                        Get your WCIF file from <code>https://www.worldcubeassociation.org/api/v0/competitions/YourCompetitionID/wcif/public</code> Replace <code>YourCompetitionID</code> with your competition's name (e.g SouthAustralianOpen2022)
+                    </p>
+                    <button class="btn btn-secondary" onclick="UseDemoWCIF()">Use Example WCIF</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Badge Settings</h4>
+                    <p><strong>Select what to generate and customize it</strong></p>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="select-template">Format</label>
+                        </div>
+                        <select class="custom-select" id="select-template" onchange="TemplateChanged(this)">
+                        </select>
+                    </div>
 
+                    <p><span id="template-description"></span></p>
 
-            <button onclick="GenerateDocument()">Generate</button>
-            <button id="print-button" onclick="PrintDocument()" disabled>Print</button>
-            <p id="status" class="info"></p>
+                    <hr>
 
-            <div id="print-document" style="display:none;"></div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text">Upload Background Image</span>
+                        </div>
+                        <div class="custom-file">
+                          <input type="file" class="custom-file-input" id="backgroundImageLogo" onchange="ReadBackgroundImage(this)">
+                          <label class="custom-file-label" id="backgroundImgLabel" for="backgroundImageLogo">Choose image...</label>
+                        </div>
+                    </div>
 
-            <embed id="document-preview" src="" type="application/pdf">
+                    <p><span class="badge-only">
+                        Background images should be landscape A7 size (105mm x 74.25mm) or 1241px x 877px is recommended. The top 50mm (591px) is available for your competitions logo. The bottom 24.25mm (286px) is reserved for badge content and this part of your image should be very simple or blank. PNG or JPEG image formats are recommended.
+                    </span><span class="certificate-only">
+                        Background images should be landscape A4 size (297mm x 210mm) or 3508px x 2482px is recommended. The background image can be tinted using the 'Border Color' option. Any transparent parts will show the background color, which can be adjusted with the 'Background Color' option.
+                    </span></p>
 
-            <div id="template"></div>
+                    <hr>
 
-            <p>Version 2.0.0</p>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text">Upload Organization Logo</span>
+                        </div>
+                        <div class="custom-file">
+                          <input type="file" class="custom-file-input" id="orgLogoUpload" onchange="ReadOrganizationImage(this)">
+                          <label class="custom-file-label" id="orgLogoLabel" for="orgLogoUpload">sca.png</label>
+                        </div>
+                    </div>
+                    <p>
+                        Your regional organizations logo, defaults to Speedcubing Australia's. Any high-quality size is appropriate. PNG or JPEG image formats are recommended.
+                    </p>
+
+                    <hr>
+
+                    <li class="certificate-only">Background color tint <input type="text" value="#006400" onchange="settings.certBorderTint = this.value"></input></li>
+                    <li class="certificate-only">Text color <input type="text" value="#006400" onchange="settings.certTextColor = this.value"></input></li>
+                    <li class="certificate-only">Page color <input type="text" value="#dfefdf" onchange="settings.certPageColor = this.value"></input></li>
+                    <li class="certificate-only">Signature name for certificate <input type="text" value="Name" onchange="settings.certOrganiser = this.value"></input></li>
+                    <li class="certificate-only">Signature role for certificate <input type="text" value="WCA DELEGATE" onchange="settings.certRole = this.value"></input></li>
+
+                    <div class="form-check" class="badge-only">
+                        <input class="form-check-input" type="checkbox" id="includeLocalName" onclick="settings.includeLocalName = this.checked">
+                        <label class="form-check-label" for="includeLocalName">
+                            Include local names
+                        </label>
+                    </div>
+                    <div class="form-check" class="badge-only">
+                        <input checked class="form-check-input" type="checkbox" id="includeStations" onclick="settings.includeStations = this.checked">
+                        <label class="form-check-label" for="includeStations">
+                            Include stations in schedules
+                        </label>
+                    </div>
+                    <div class="form-check" class="badge-only">
+                        <input checked class="form-check-input" type="checkbox" id="includeStaffing" onclick="settings.includeStaffing = this.checked">
+                        <label class="form-check-label" for="includeStaffing">
+                            Include staffing in schedules
+                        </label>
+                    </div>
+                    <div class="form-check" class="badge-only">
+                        <input class="form-check-input" type="checkbox" id="hideStaffOnly" onclick="settings.hideStaffOnlyAssignments = this.checked">
+                        <label class="form-check-label" for="hideStaffOnly">
+                            Hide staff only assignments in schedule
+                        </label>
+                    </div>
+                    <div class="form-check" class="badge-only">
+                        <input checked class="form-check-input" type="checkbox" id="includeQRCode" onclick="settings.showWcaLiveQrCode = this.checked">
+                        <label class="form-check-label" for="includeQRCode">
+                            Include WCA Live QR code with schedules
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Document</h4>
+                    <p>
+                        'Generate' and preview the document. Adjust settings as needed and 'Generate' again. 'Download' to save the PDF document.
+                    </p>
+                    <button class="btn btn-primary" onclick="GenerateDocument()">Generate</button>
+                    <button class="btn btn-secondary" id="print-button" onclick="PrintDocument()" disabled>Download</button>
+                    <p id="status" class="info"></p>
+
+                    <div id="print-document" style="display:none;"></div>
+                    <embed id="document-preview" type="application/pdf" src="">
+                    </embed>
+                </div>
+            </div>
+
+            <p>Version 2.1.0</p>
 
             <div id="hidden-images">
                 <img style="display: none;" id="org-img" src="./images/sca.png"/>
-                <img style="display: none;" id="org-large-img" src="./images/sca-large.png"/>
                 <img style="display: none;" id="wca-img" src="./images/wca.png"/>
                 <img style="display: none;" id="wca-large-img" src="./images/wca-large.png"/>
-                <img style="display: none;" id="background-img" src="./images/badge-a4-3x3-default.png"/>
+                <img style="display: none;" id="background-img" src="./images/a7-placeholder.png"/>
                 <img style="display: none;" id="wca-live-qrcode-img" src="./images/wca-live-qrcode.png"/>
             </div>
         </div>
@@ -83,6 +174,7 @@ title: Badgifier
 <script src="./lib/WenQuanYiZenHei-normal.js"></script>
 <script src="./lib/cubing-icons-normal.js"></script>
 
+<script src="./demoWCIF.js"></script>
 <script src="./images/cert-border.js"></script>
 
 <script src="./utils.js"></script>

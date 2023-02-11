@@ -41,13 +41,13 @@ var templates = [
     // },
     {
         name: "Landscape Book",
-        description: "Individual landscape badge and schedule for printing on a single landscape A6 page",
+        description: "Individual landscape badges and schedule for printing on landscape A6 pages",
         generationFunction: MakeA6LandscapeBadges,
         isCertificate: false,
     },
     {
         name: "Landscape Book 2x2",
-        description: "4 landscape badges and schedules for printing on a landscape A4 pages",
+        description: "4 landscape badges and schedules for printing on landscape A4 pages",
         generationFunction: MakeA4LandscapeBadges,
         isCertificate: false,
     },
@@ -153,6 +153,7 @@ function ReadWCIF(input) {
         // Check WCIF
         try {
             wcif = JSON.parse(fileReader.result);
+            $("#wcifFileLabel").text(file.name);
 
             GetActivities();
             LoadCountryFlags();
@@ -172,6 +173,13 @@ function ReadWCIF(input) {
     }; 
 }
 
+function UseDemoWCIF() {
+    wcif = demoWcif;
+    $("#wcifFileLabel").text("SouthAustralianOpen2022.json");
+    GetActivities();
+    LoadCountryFlags();
+}
+
 
 // Read background image from user
 function ReadBackgroundImage(input) {
@@ -182,6 +190,8 @@ function ReadBackgroundImage(input) {
         backgroundImage = fileReader.result;
         console.log(backgroundImage)
         $("#background-img").attr("src",backgroundImage);
+        $("#backgroundImgLabel").text(file.name);
+
         SetStatus("Updated background image", STATUS_MODE_INFO);
     }; 
     fileReader.onerror = function() {
@@ -199,6 +209,8 @@ function ReadOrganizationImage(input) {
 
         // Add organization image css to style badges
         $("#org-img").attr("src",organizationImage);
+        $("#orgLogoLabel").text(file.name);
+
         SetStatus("Updated organization image", STATUS_MODE_INFO);
     }; 
     fileReader.onerror = function() {
@@ -229,15 +241,18 @@ function GenerateDocument() {
                 // Allow document to be printed
                 $("#print-button").prop("disabled", false);
 
-                var out = globalDoc.output("datauristring")
-                $("#document-preview").attr("src", out)
+                var blob = globalDoc.output('blob')
+                var blob_url = URL.createObjectURL(blob);
+                $("#document-preview").attr("src", blob_url)
+                $("#document-preview").show();
                 
                 SetStatus("PDF ready!", STATUS_MODE_INFO);
             }
         } catch {
+            $("#print-button").prop("disabled", true);
             SetStatus("PDF failed to generate", STATUS_MODE_ERROR);
         }
-    }, 0);
+    }, 100);
 }
 
 function PrintDocument() {

@@ -51,12 +51,12 @@ var templates = [
         generationFunction: MakeA4LandscapeBadges,
         isCertificate: false,
     },
-    // {
-    //     name: "Certificate",
-    //     description: "Landscape certificates for all events",
-    //     generationFunction: MakeCertificates,
-    //     isCertificate: true,
-    // },
+    {
+        name: "Certificate",
+        description: "Landscape certificates for all events",
+        generationFunction: MakeCertificates,
+        isCertificate: true,
+    },
 ]
 
 // Settings
@@ -71,9 +71,10 @@ var settings = {
     // Certificate settings
     certOrganiser: "Name",
     certRole: "WCA DELEGATE",
-    certBorderTint: "#006400",
-    certTextColor: "#006400",
+    certBackgroundTint: "#006400",
     certPageColor: "#dfefdf",
+    certTextColor: "#005400",
+    certThinMargins: false,
 } 
 
 // Set status text
@@ -181,22 +182,40 @@ function UseDemoWCIF() {
 }
 
 
-// Read background image from user
-function ReadBackgroundImage(input) {
+// Read badge background image from user
+function ReadBadgeBackgroundImage(input) {
     let file = input.files[0]; 
     let fileReader = new FileReader(); 
     fileReader.readAsDataURL(file); 
     fileReader.onload = function() {
-        backgroundImage = fileReader.result;
-        console.log(backgroundImage)
-        $("#background-img").attr("src",backgroundImage);
-        $("#backgroundImgLabel").text(file.name);
+        $("#badge-img").attr("src", fileReader.result);
+        $("#badgeBackgroundImgLabel").text(file.name);
 
-        SetStatus("Updated background image", STATUS_MODE_INFO);
+        SetStatus("Updated badge background image", STATUS_MODE_INFO);
     }; 
     fileReader.onerror = function() {
         SetStatus("Couldn't read image file", STATUS_MODE_ERROR);
     }; 
+}
+
+// Read certificate background image from user
+function ReadCertBackgroundImage(input) {
+    let file = input.files[0]; 
+    let fileReader = new FileReader(); 
+    fileReader.readAsDataURL(file); 
+    fileReader.onload = function() {
+        $("#certificate-img").attr("src", fileReader.result);
+        $("#certBackgroundImgLabel").text(file.name);
+
+        SetStatus("Updated certificate background image", STATUS_MODE_INFO);
+    }; 
+    fileReader.onerror = function() {
+        SetStatus("Couldn't read image file", STATUS_MODE_ERROR);
+    }; 
+
+    $("#cert-background-tint-input").data().colorpicker.setValue("#FFFFFF")
+    $("#cert-page-color-input").data().colorpicker.setValue("#FFFFFF")
+    $("#cert-text-color-input").data().colorpicker.setValue("#000000")
 }
 
 // Read organization image from user
@@ -248,7 +267,8 @@ function GenerateDocument() {
                 
                 SetStatus("PDF ready!", STATUS_MODE_INFO);
             }
-        } catch {
+        } catch (e) {
+            console.error(e)
             $("#print-button").prop("disabled", true);
             SetStatus("PDF failed to generate", STATUS_MODE_ERROR);
         }
@@ -280,4 +300,15 @@ $(document).ready(function () {
     $(".certificate-only").hide();
 
     $("#document-preview").hide();
+
+    $("#cert-background-tint-input").colorpicker({
+        color: settings.certBackgroundTint
+    });
+    $("#cert-page-color-input").colorpicker({
+        color: settings.certPageColor
+    });
+    $("#cert-text-color-input").colorpicker({
+        color: settings.certTextColor
+    });
+
 });

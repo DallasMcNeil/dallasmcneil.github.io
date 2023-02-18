@@ -10,6 +10,16 @@ const A7P_HEIGHT = 105
 
 function MMtoPDF(mm) { return (mm*72.0/25.4)}
 
+// Convert a hexadecimal number to rgb components
+function HexToRgb(hex) {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? [
+      parseInt(result[1], 16),
+      parseInt(result[2], 16),
+      parseInt(result[3], 16)
+     ] : null;
+}
+
 // Draw a name with support for non-latin unicode characters in brackets
 // e.g text = "Latin Name (LocalName)"
 // x,y,w,h specifies box for text to be located in
@@ -131,6 +141,25 @@ function DrawTextBox(doc, text, align, x, y, w, h, fillColor=[255,255,255], icon
     }
 
     doc.restoreGraphicsState();
+}
+
+function DrawText(doc, text, align, x, y, w, h) {
+    // Just latin text to be drawn
+    var fontSize = h * 2.2;
+    doc.setFontSize(fontSize);
+
+    var textWidth = doc.getTextWidth(text);
+    var horizontalScale = Math.min(1, w / textWidth);
+    if (horizontalScale == 1 && align == "center") {
+        doc.text(text, (w/2) + x, y, {
+            align:"center"
+        });
+    } else {
+        doc.text(text, x, y, {
+            align:"left",
+            horizontalScale: horizontalScale,
+        });
+    }
 }
 
 // Draws an entire A6 landscape name badge
@@ -256,8 +285,8 @@ function AddLandscapeNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
         }
         
         // Add background
-        var backgroundRatio = $("#background-img").height() / $("#background-img").width();
-        doc.addImage($("#background-img")[0], "PNG", 0, 0, A7L_WIDTH, A7L_WIDTH * backgroundRatio, "background", "SLOW");
+        var backgroundRatio = $("#badge-img").height() / $("#badge-img").width();
+        doc.addImage($("#badge-img")[0], "PNG", 0, 0, A7L_WIDTH, A7L_WIDTH * backgroundRatio, "background", "SLOW");
 
         // Place name, starting from bottom and adding extra lines on top for longer names
         DrawName(doc, name, "center", 5, 57, A7L_WIDTH - 10, 10)
@@ -458,7 +487,7 @@ function AddLandscapeNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
 }
 
 // Draws an entire A6 landscape name badge
-function AddCertificate(doc, eventIndex, place, dateText) {
+function AddCertificate(doc, eventIndex, place, dateText, tintedImage) {
 
     // Get event specific text
     var eventText = "";
@@ -466,10 +495,10 @@ function AddCertificate(doc, eventIndex, place, dateText) {
     if (eventIndex != wcif.events.length) {
         eventText = eventMap[wcif.events[eventIndex].id];
         resultPrefixText = eventFormatMap[wcif.events[eventIndex].rounds[wcif.events[eventIndex].rounds.length - 1].format];
-        if (wcif.events[e].id == "333mbf") {
+        if (wcif.events[eventIndex].id == "333mbf") {
             resultPrefixText = multiblindFormatText;
         }
-        if (wcif.events[e].id == "333fm") {
+        if (wcif.events[eventIndex].id == "333fm") {
             resultPrefixText = fewestMovesFormatText;
         }
     }
@@ -479,92 +508,61 @@ function AddCertificate(doc, eventIndex, place, dateText) {
     if (eventIndex != wcif.events.length) {
         placeText = placeMap[place];
     }
-
     
-    // // Create certificate
-    // var cert = $('#badge-template').children().first().clone();
-    // cert.css("background-color", settings.certPageColor);
-    // cert.css("width",`${template.badgeWidth}cm`);
-    // cert.css("height",`${template.badgeHeight}cm`);
-    // cert.css("top", `0cm`)
-    // cert.css("left", `0cm`)
-    // cert.removeAttr("id");
-    // cert.show();
-
-    // // Modify shown text
-    // cert.find(".wca-comp-name").text(wcif.name);
-    // cert.find(".wca-event").text(eventText);
-    // cert.find(".wca-place").text(placeText);
-    // cert.find(".wca-result-prefix").text(resultPrefixText);
-    // cert.find(".wca-date").text(certDate);
-    // cert.find(".wca-sig-name").text(settings.certOrganiser);
-    // cert.find(".wca-sig-role").text(settings.certRole);
-
-    // // Modify color of elements
-    // cert.find(".wca-comp-name").css("color", settings.certTextColor);
-    // cert.find(".wca-event").css("color", settings.certTextColor);
-    // cert.find(".wca-place").css("color", settings.certTextColor);
-    // cert.find(".wca-result-prefix").css("color", settings.certTextColor);
-    // cert.find(".date").css("color", settings.certTextColor);
-    // cert.find(".line-left").css("background-color", settings.certTextColor);
-    // cert.find(".line-right").css("background-color", settings.certTextColor);
-    // cert.find(".wca-sig-role").css("color", settings.certTextColor);
-    
-    // // Add cert to page
-    // var page = doc.find(".print-page").last();
-    // page.append(cert);
-
+    var pageColor = HexToRgb(settings.certPageColor)
+    var textColor = HexToRgb(settings.certTextColor)
     
     // ==================
     // Create certificate
     // ==================
     
-    doc.saveGraphicsState();
+    // Add page
+    doc.setFillColor(pageColor[0], pageColor[1], pageColor[2]);
+    doc.rect(0, 0, A4L_WIDTH, A4L_HEIGHT, "F");
 
     // Add background
-    var backgroundRatio = $("#background-img").height() / $("#background-img").width();
-    doc.addImage($("#background-img")[0], "PNG", 0, 0, A7L_WIDTH, A7L_WIDTH * backgroundRatio, "background", "SLOW");
+    var backgroundRatio = tintedImage.height / tintedImage.width;
+    doc.addImage(tintedImage, "PNG", 0, 0, A4L_WIDTH, A4L_WIDTH * backgroundRatio, "background", "SLOW");
 
-    // Place name, starting from bottom and adding extra lines on top for longer names
-    DrawName(doc, name, "center", 5, 57, A7L_WIDTH - 10, 10)
 
-    doc.setLineWidth(0.25);
-    doc.setDrawColor(0,0,0);
-    doc.line(20, 59, A7L_WIDTH - 20, 59);
-
-    // Place WCA ID
-    doc.setFont("NotoSans-Regular")
-    doc.setFontSize(13);
-    
-    if (persons[index].wcaId == null) {
-        doc.setTextColor(196,0,0);
-        doc.text("NEWCOMER", A7L_WIDTH/2, 64, {
-            align:"center",
-        });
-    } else {
-        doc.text(wcaid, A7L_WIDTH/2, 64, {
-            align:"center",
-        });
-    }
-    doc.setTextColor(0,0,0);
+    var logoMargins = settings.certThinMargins ? [5.0, 5.0] : [22.0, 22.0]
+    var logoHeight = 28.0
 
     // Add logos
-    var wcaRatio = $("#wca-img").width() / $("#wca-img").height();
-    doc.addImage($("#wca-img")[0], "PNG", 3, A7L_HEIGHT - 13, 10 * wcaRatio, 10, "wca", "SLOW");
+    var wcaRatio = $("#wca-large-img").width() / $("#wca-large-img").height();
+    doc.addImage($("#wca-large-img")[0], "PNG", logoMargins[0], logoMargins[1], logoHeight * wcaRatio, logoHeight, "wca-large", "SLOW");
 
     var orgRatio = $("#org-img").width() / $("#org-img").height();
-    doc.addImage($("#org-img")[0], "PNG", A7L_WIDTH - (10 * orgRatio) - 3, A7L_HEIGHT - 13, 10 * orgRatio, 10, "org", "SLOW");
+    doc.addImage($("#org-img")[0], "PNG", A4L_WIDTH - logoMargins[0] - (logoHeight * orgRatio), logoMargins[1], logoHeight * orgRatio, logoHeight, "org", "SLOW");
 
-    // Add country flag
-    var flagRatio = $(`#${countryCode}-flag`).width() / $(`#${countryCode}-flag`).height();
-    var flagWidth = flagRatio * 5;
-    doc.addImage($(`#${countryCode}-flag`)[0], "PNG", (A7L_WIDTH - flagWidth) / 2, A7L_HEIGHT - 8, flagWidth, 5, `${countryCode}-flag`, "SLOW");
+    // Add Main text
+    doc.setFont("Fenix-Regular");
+    doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+    DrawText(doc, wcif.name, "center", 10, 78, A4L_WIDTH - 20, 21);
+    DrawText(doc, eventText, "center", 10, 97, A4L_WIDTH - 20, 21);
+    DrawText(doc, placeText, "center", 10, 108, A4L_WIDTH - 20, 11);
+    doc.setFontSize(22);
+    doc.text(resultPrefixText, (A4L_WIDTH/2) - 2, 139, {
+        align:"right",
+    });
+ 
+    // Add empty boxes
+    doc.setFillColor(255,255,255);
+    doc.rect(68, 110, 161, 15, "F");
+    doc.rect(A4L_WIDTH/2, 129, 70, 13, "F");
 
-    doc.setLineWidth(0.1);
-    doc.setDrawColor(0,0,0);
-    doc.rect((A7L_WIDTH - flagWidth) / 2, A7L_HEIGHT - 8, flagWidth, 5);
+    // Add date and signature
+    var bottomHeight = logoMargins[1] + 18
+    doc.setLineWidth(0.75);
+    doc.setDrawColor(textColor[0], textColor[1], textColor[2]);
+    doc.line(logoMargins[0], A4L_HEIGHT - bottomHeight, logoMargins[0] + 60, A4L_HEIGHT - bottomHeight);
+    doc.line(A4L_WIDTH - logoMargins[0], A4L_HEIGHT - bottomHeight, A4L_WIDTH - logoMargins[0] - 60, A4L_HEIGHT - bottomHeight);
 
-    doc.restoreGraphicsState();
+    DrawText(doc, dateText, "center", logoMargins[0] - 5, A4L_HEIGHT - bottomHeight - 3, 70, 9);
+    DrawText(doc, settings.certRole, "center", A4L_WIDTH - logoMargins[0] - 65, A4L_HEIGHT - bottomHeight + 14, 70, 8);
+
+    DrawText(doc, "DATE", "center", logoMargins[0] - 5, A4L_HEIGHT - bottomHeight + 7, 70, 8);
+    DrawText(doc, settings.certOrganiser, "center", A4L_WIDTH - logoMargins[0] - 65, A4L_HEIGHT - bottomHeight + 7, 70, 9);
 }
 
 var persons;
@@ -697,21 +695,10 @@ function MakeCertificates() {
         format:'a4',
     });
 
-    var backgroundData = doc.extractImageFromDataUrl(defaultCertBackground)
-    console.log(backgroundData);
-
-    // Generate certificate
-
-    // // If certificate, we want to color adjust the border/background image
-    // if (template.isCertificate) {
-    //     if (backgroundImage != "") {
-    //         $(".wca-border").attr('src', backgroundImage);
-    //     }
-
-    //     var backgroundTint = hexToRgb(settings.certBorderTint);
-
-    //     $("#border-filter-values").attr('values', `${backgroundTint.r/255} 0 0 0 0 0 ${backgroundTint.g/255} 0 0 0 0 0 ${backgroundTint.b/255} 0 0 0 0 0 1 0`);
-    // }
+    // Create tinted image
+    var tintedImage = CreateTintedImage($("#certificate-img")[0], HexToRgb(settings.certBackgroundTint));
+    tintedImage.width = $("#certificate-img").width();
+    tintedImage.height = $("#certificate-img").height();
 
     // Get date text
     var certDate = moment(wcif.schedule.startDate).add(wcif.schedule.numberOfDays-1, 'days')
@@ -723,11 +710,11 @@ function MakeCertificates() {
         // Create first, second and third certificates for events
         for (var p=2; p>=0; p--) {    
             // Create a new page
-            if (e != 0 || p != 0) {
+            if (e != 0 || p != 2) {
                 globalDoc.addPage("a4", "l");
             }
 
-            AddCertificate(globalDoc, e, p, certDate);
+            AddCertificate(globalDoc, e, p, certDate, tintedImage);
 
             // Only need one page for empty certificate
             if (e == wcif.events.length) {
@@ -737,4 +724,35 @@ function MakeCertificates() {
     }
 
     return true;
+}
+
+function CreateTintedImage(img, color) {
+    console.log(img)
+    var w = img.width;
+    var h = img.height;
+
+    var canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage( img, 0, 0 );
+    var pixels = ctx.getImageData( 0, 0, w, h ).data;
+
+    var to = ctx.getImageData( 0, 0, w, h );
+    var toData = to.data;
+
+    for (var i = 0, len = pixels.length; i < len; i += 4) {
+        toData[i  ] = pixels[i  ] * (color[0] / 255.0);
+        toData[i+1] = pixels[i+1] * (color[1] / 255.0);
+        toData[i+2] = pixels[i+2] * (color[2] / 255.0);
+        toData[i+3] = pixels[i+3];
+    }
+    
+    ctx.putImageData(to, 0, 0 );
+    
+    var imgComp = new Image();
+    imgComp.src = canvas.toDataURL();
+        
+    return imgComp;
 }

@@ -1,55 +1,36 @@
 
 var templates = [
-    // {
-    //     name: "Basic 3x3",
-    //     description: "3 rows of 3 badges for printing on a landscape A4 page, no schedule",
-    //     link: "./templates/Standard-basic.html",
-    //     isCertificate: false,
-    //     pageWidth: 29.7,
-    //     pageHeight: 21,
-    //     pageRows: 3,
-    //     pageColumns: 3,
-    //     badgeWidth: 9.9,
-    //     badgeHeight: 7,
-    //     badgeScale: 1.0,
-    // },
-    // {
-    //     name: "Book",
-    //     description: "Individual portrait badge and schedule for printing on a single landscape A6 page",
-    //     link: "./templates/Standard-book.html",
-    //     isCertificate: false,
-    //     pageWidth: 29.7,
-    //     pageHeight: 21,
-    //     pageRows: 1,
-    //     pageColumns: 1,
-    //     badgeWidth: 29.7,
-    //     badgeHeight: 21,
-    //     badgeScale: 1.0,
-    // },
-    // {
-    //     name: "Book 2x2",
-    //     description: "2 rows of 2 columns of portrait badges and schedule for printing on a landscape A4 page",
-    //     link: "./templates/Standard-book.html",
-    //     isCertificate: false,
-    //     pageWidth: 29.7,
-    //     pageHeight: 21,
-    //     pageRows: 2,
-    //     pageColumns: 2,
-    //     badgeWidth: 29.7,
-    //     badgeHeight: 21,
-    //     badgeScale: 0.5,
-    // },
     {
         name: "Landscape Book",
-        description: "Individual landscape badges and schedule for printing on landscape A6 pages",
+        description: "Individual landscape badges and schedule for printing on A6 pages",
         generationFunction: MakeA6LandscapeBadges,
         isCertificate: false,
+        placeholderImage: "images/a7-placeholder.png",
+        imageDescription: "Background images should be landscape A7 size (105mm x 74.25mm) or 1241px x 877px is recommended. The top 50mm (591px) is available for your competitions logo. The bottom 24.25mm (286px) is reserved for badge content and this part of your image should be very simple or blank. PNG or JPEG image formats are recommended.",
     },
     {
         name: "Landscape Book 2x2",
-        description: "4 landscape badges and schedules for printing on landscape A4 pages",
+        description: "4 landscape badges and schedules for printing on A4 pages",
         generationFunction: MakeA4LandscapeBadges,
         isCertificate: false,
+        placeholderImage: "images/a7-placeholder.png",
+        imageDescription: "Background images should be landscape A7 size (105mm x 74.25mm) or 1241px x 877px is recommended. The top 50mm (591px) is available for your competitions logo. The bottom 24.25mm (286px) is reserved for badge content and this part of your image should be very simple or blank. PNG or JPEG image formats are recommended.",
+    },
+    {
+        name: "Portrait Book",
+        description: "Individual portrait badges and schedule for printing on A6 pages",
+        generationFunction: MakeA6PortraitBadges,
+        isCertificate: false,
+        placeholderImage: "images/a7p-placeholder.png",
+        imageDescription: "Background images should be portrait A7 size (74.25mm x 105mm) or 877px x 1241px is recommended. The top 64mm (756px) is available for your competitions logo. The bottom 41mm (485px) is reserved for badge content and this part of your image should be very simple or blank. PNG or JPEG image formats are recommended.",
+    },
+    {
+        name: "Portrait Book 2x2",
+        description: "4 portrait badges and schedules for printing on A4 pages",
+        generationFunction: MakeA4PortraitBadges,
+        isCertificate: false,
+        placeholderImage: "images/a7p-placeholder.png",
+        imageDescription: "Background images should be portrait A7 size (74.25mm x 105mm) or 877px x 1241px is recommended. The top 64mm (756px) is available for your competitions logo. The bottom 41mm (485px) is reserved for badge content and this part of your image should be very simple or blank. PNG or JPEG image formats are recommended.",
     },
     {
         name: "Certificate",
@@ -66,6 +47,7 @@ var settings = {
     // Badge settings
     includeStaffing: true,
     includeStations: true,
+    includeLocalName: false,
     hideStaffOnlyAssignments: false,
     showWcaLiveQrCode: true,
     // Certificate settings
@@ -183,6 +165,7 @@ function UseDemoWCIF() {
 
 
 // Read badge background image from user
+var hasReadBadgeBackgroundImage = false;
 function ReadBadgeBackgroundImage(input) {
     let file = input.files[0]; 
     let fileReader = new FileReader(); 
@@ -191,6 +174,7 @@ function ReadBadgeBackgroundImage(input) {
         $("#badge-img").attr("src", fileReader.result);
         $("#badgeBackgroundImgLabel").text(file.name);
 
+        hasReadBadgeBackgroundImage = true;
         SetStatus("Updated badge background image", STATUS_MODE_INFO);
     }; 
     fileReader.onerror = function() {
@@ -241,13 +225,17 @@ function ReadOrganizationImage(input) {
 function TemplateChanged(select) {
     settings.template = Number(select.value);
     $("#template-description").text(templates[settings.template].description);
-
+    
     if (templates[settings.template].isCertificate) {
         $(".badge-only").hide();
         $(".certificate-only").show();
     } else {
         $(".badge-only").show();
         $(".certificate-only").hide();
+        if (!hasReadBadgeBackgroundImage) {
+            $("#badge-img").attr("src", templates[settings.template].placeholderImage);
+            $("#badge-image-description").text(templates[settings.template].imageDescription);
+        }
     }
 }
 
@@ -312,3 +300,24 @@ $(document).ready(function () {
     });
 
 });
+
+// Station coloring rules
+// Event - Dropdown from events being held
+// - Round - Irrelevant since no second rounds are on schedules
+// Group - Comma separated round numbers to apply to, or empty for all
+// Stations - Comma separated station numbers to apply to, or empty for all
+// e.g
+// 3x3x3 | 1,2,3,... | 21,22,23,24,... | #FF0000
+// ALL | | | #0000FF
+
+// Table with each row being a rule. Early rules preceed later rules
+// 3 buttons, move up, move down, delete
+// 1 button on bottom to add row to bottom
+
+// OR
+
+// Simple text box
+// "
+// #FF0000;333;1,2,3,...;21,22,23,24,...
+// #0000FF
+//"

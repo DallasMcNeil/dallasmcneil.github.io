@@ -45,11 +45,14 @@ var settings = {
     // General settings
     template: 0,
     // Badge settings
+    includeTimes: true,
     includeStaffing: true,
     includeStations: true,
     includeLocalName: false,
     hideStaffOnlyAssignments: false,
     showWcaLiveQrCode: true,
+    customScheduleColors: false,
+    customScheduleColorsCode: "",
     // Certificate settings
     certOrganiser: "Name",
     certRole: "WCA DELEGATE",
@@ -239,8 +242,18 @@ function TemplateChanged(select) {
     }
 }
 
+// Template has been selected, chang settings and UI
+function UseCustomColorChanged() {
+    if (settings.customScheduleColors) {
+        $("#customColors").show();
+    } else {
+        $("#customColors").hide();
+    }
+}
+
 function GenerateDocument() {
     SetStatus("Generating PDF...", STATUS_MODE_INFO);
+    settings.customScheduleColorsCode = $("#customColorsCode").val();
     setTimeout(() => {
         try {
             var error = !MakeDocument();
@@ -299,25 +312,24 @@ $(document).ready(function () {
         color: settings.certTextColor
     });
 
+    UseCustomColorChanged();
+    $("#customColorsCode").val(`// Input variables
+// event: string; the event code (e.g '333', 'pyra')
+// group: number; the group number, 1 or higher. If no group, then null
+// station: number; the station number, 1 or higher. If no station, then null
+// row: number; the row number in the schedule for each day, 0 or higher
+// Output variable
+// color: string; a hex color to set the background of the schedule row (e.g #FFB0B0 for a light red)
+
+// Example; alternating groups between red and green (for two different stages)
+// with some events in a side room (blue)
+
+if (event == "333mbf" || event == "444bf" || event == "555bf") {
+    color = "#B0B0FF" // Side room events, blue
+} else if (group % 2 == 0) {
+    color = "#FFB0B0" // Even groups, red
+} else {
+    color = "#B0FFB0" // Odd groups, green
+}`);
+
 });
-
-// Station coloring rules
-// Event - Dropdown from events being held
-// - Round - Irrelevant since no second rounds are on schedules
-// Group - Comma separated round numbers to apply to, or empty for all
-// Stations - Comma separated station numbers to apply to, or empty for all
-// e.g
-// 3x3x3 | 1,2,3,... | 21,22,23,24,... | #FF0000
-// ALL | | | #0000FF
-
-// Table with each row being a rule. Early rules preceed later rules
-// 3 buttons, move up, move down, delete
-// 1 button on bottom to add row to bottom
-
-// OR
-
-// Simple text box
-// "
-// #FF0000;333;1,2,3,...;21,22,23,24,...
-// #0000FF
-//"

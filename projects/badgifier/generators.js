@@ -22,6 +22,126 @@ function HexToRgb(hex) {
      ] : null;
 }
 
+// Get all the information we need to display for a person
+// This includes building a schedule to display
+function GeneratePersonInformation(index) {
+    var isBlank = index >= persons.length;
+    var name = "";
+    var wcaid = null;
+    var compid = "-";
+    var countryCode = "";
+    var personalSchedule = {}
+    var sortedSchedule = []
+
+    if (!isBlank) {
+        name = persons[index].name;
+        wcaid = persons[index].wcaId;
+        compid = persons[index].registrantId;
+        countryCode = persons[index].countryIso2.toLowerCase();
+
+        // If a schedule table exists, create a personal schedule for each day
+        // This object holds all assignment information per event, combining staffing and competing 
+        for (var a=0; a<persons[index].assignments.length; a++) {
+            // Check for activity information
+            var assignment = persons[index].assignments[a];
+            var activity = activities[assignment.activityId];
+            if (activities[assignment.activityId] == undefined) {
+                warning = `Missing activity: ${assignment.activityId}`;
+                continue;
+            }
+
+            var startTime = moment(activity.roundStartTime).tz(activity.timezone); 
+            var endTime = moment(activity.roundEndTime).tz(activity.timezone);
+            var day = startTime.day();
+
+            // Create daily information if it doesn't exist
+            if (personalSchedule[day] == undefined) {
+                personalSchedule[day] = {
+                    day: day,
+                    sortTime: startTime.unix(),
+                    assignments: {},
+                    sortedAssignments: [],
+                }
+            }
+
+            var codes = activity.activityCode.split('-')
+            var event = codes[0]
+            var group = codes[2]
+
+            // Create assignment for activity if it doesn't exist
+            if (personalSchedule[day].assignments[activity.parentActivityCode] == undefined) {
+                personalSchedule[day].assignments[activity.parentActivityCode] = {
+                    timeText: `${startTime.format("HH[:]mm")} - ${endTime.format("HH[:]mm")}`,
+                    sortTime: startTime.unix(),
+                    eventCode: event,
+                    eventText: eventMap[event],
+                    competing: -1,
+                    stationNumber: null,
+                    judging: [],
+                    running: [],
+                    scrambling: [],
+                };
+            }
+            
+            // Add information to assignment
+            if (assignment.assignmentCode == "competitor") {
+                personalSchedule[day].assignments[activity.parentActivityCode].competing = group.substr(1);
+                personalSchedule[day].assignments[activity.parentActivityCode].stationNumber = assignment.stationNumber;
+            } else if (assignment.assignmentCode == "staff-judge") {
+                personalSchedule[day].assignments[activity.parentActivityCode].judging.push(group.substr(1));
+            } else if (assignment.assignmentCode == "staff-runner") {
+                personalSchedule[day].assignments[activity.parentActivityCode].running.push(group.substr(1));
+            } else if (assignment.assignmentCode == "staff-scrambler") {
+                personalSchedule[day].assignments[activity.parentActivityCode].scrambling.push(group.substr(1));
+            } else {
+                warning = `Unhandled assignment code: ${assignment.assignmentCode}`;
+            }
+        }
+
+        // Sort daily schedules by start time
+        for (let value of Object.values(personalSchedule)) {
+            sortedSchedule.push(value);
+        }
+
+        sortedSchedule.sort((a,b) => {
+            if (a.sortTime < b.sortTime) {
+                return -1;
+            }
+            if (a.sortTime > b.sortTime) {
+                return 1;
+            }
+            return 0;
+        });
+
+        // Sort assignments within day by time they start
+        for (var i=0; i<sortedSchedule.length; i++) {   
+            for (let value of Object.values(sortedSchedule[i].assignments)) {
+                sortedSchedule[i].sortedAssignments.push(value);
+            }
+            
+            sortedSchedule[i].sortedAssignments.sort((a,b) => {
+                if (a.sortTime < b.sortTime) {
+                    return -1;
+                }
+                if (a.sortTime > b.sortTime) {
+                    return 1;
+                }
+                return a.eventCode > b.eventCode;
+            });
+        }
+    }
+
+    return {
+        blank: isBlank,
+        name: name,
+        wcaid: wcaid,
+        compid: compid,
+        countryCode: countryCode,
+        personalSchedule: personalSchedule,
+        sortedSchedule: sortedSchedule,
+    }
+}
+
 // Draw a name with support for non-latin unicode characters in brackets
 // e.g text = "Latin Name (LocalName)"
 // x,y,w,h specifies box for text to be located in
@@ -151,8 +271,6 @@ function SplitNameOntoTwoLines(doc, text, h) {
         }
     }
 
-    console.log(textParts)
-
     doc.restoreGraphicsState();
 
     // Determine best way to split
@@ -236,6 +354,7 @@ function DrawTextBox(doc, text, align, x, y, w, h, fillColor=[255,255,255], icon
     doc.restoreGraphicsState();
 }
 
+// Draw some text with alignment and a maximum width allowed
 function DrawText(doc, text, align, x, y, w, h) {
     // Just latin text to be drawn
     var fontSize = h * 2.2;
@@ -255,111 +374,174 @@ function DrawText(doc, text, align, x, y, w, h) {
     }
 }
 
-// Draws an entire A6 landscape name badge
-function AddLandscapeNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
-    // ============================
-    // Information about competitor
-    // ============================
 
-    var isBlank = index >= persons.length;
-    var name = "";
-    var wcaid = null;
-    var compid = "-";
-    var countryCode = "";
-    var personalSchedule = {}
+function GetRowColor(row, event, group, station) {
+    let color = "#FFFFFF";
+    eval(settings.customScheduleColorsCode);
+    return color;
+}
 
-    if (!isBlank) {
-        name = persons[index].name;
-        wcaid = persons[index].wcaId;
-        compid = persons[index].registrantId;
-        countryCode = persons[index].countryIso2.toLowerCase();
+// Draw the individual schedule
+// Returns the final height of the schedule
+function DrawSchedule(doc, x, y, w, info) {
 
-        // If a schedule table exists, create a personal schedule for each day
-        // This object holds all assignment information per event, combining staffing and competing 
-        for (var a=0; a<persons[index].assignments.length; a++) {
-            // Check for activity information
-            var assignment = persons[index].assignments[a];
-            var activity = activities[assignment.activityId];
-            if (activities[assignment.activityId] == undefined) {
-                warning = `Missing activity: ${assignment.activityId}`;
-                continue;
-            }
+    // Place schedule
+    const TIME_RATIO = 0.26;
+    const EVENT_RATIO = 0.37;
+    const GROUP_RATIO = 0.09;
+    const STATION_RATIO = 0.09;
+    const STAFF_RATIO = 0.19;
 
-            var startTime = moment(activity.roundStartTime).tz(activity.timezone); 
-            var endTime = moment(activity.roundEndTime).tz(activity.timezone);
-            var day = startTime.day();
+    var scale = EVENT_RATIO + GROUP_RATIO;
 
-            // Create daily information if it doesn't exist
-            if (personalSchedule[day] == undefined) {
-                personalSchedule[day] = {
-                    day: day,
-                    sortTime: startTime.unix(),
-                    assignments: {},
-                    sortedAssignments: [],
-                }
-            }
+    if (settings.includeTimes) {
+        scale += TIME_RATIO;
+    }
+    if (settings.includeStations) {
+        scale += STATION_RATIO;
+    }
+    if (settings.includeStaffing) {
+        scale += STAFF_RATIO;
+    }
 
-            var codes = activity.activityCode.split('-')
-            var event = codes[0]
-            var group = codes[2]
+    let timeWidth = (w * TIME_RATIO) / scale;
+    let eventWidth = (w * EVENT_RATIO) / scale;
+    let groupWidth = (w * GROUP_RATIO) / scale;
+    let stationWidth = (w * STATION_RATIO) / scale;
+    let staffWidth = (w * STAFF_RATIO) / scale;
+        
+    var row = y;
+    var column = x;
 
-            // Create assignment for activity if it doesn't exist
-            if (personalSchedule[day].assignments[activity.parentActivityCode] == undefined) {
-                personalSchedule[day].assignments[activity.parentActivityCode] = {
-                    timeText: `${startTime.format("HH[:]mm")} - ${endTime.format("HH[:]mm")}`,
-                    sortTime: startTime.unix(),
-                    eventCode: event,
-                    eventText: eventMap[event],
-                    competing: -1,
-                    stationNumber: null,
-                    judging: [],
-                };
-            }
-            
-            // Add information to assignment
-            if (assignment.assignmentCode == "competitor") {
-                personalSchedule[day].assignments[activity.parentActivityCode].competing = group.substr(1);
-                personalSchedule[day].assignments[activity.parentActivityCode].stationNumber = assignment.stationNumber;
-            } else if (assignment.assignmentCode == "staff-judge") {
-                personalSchedule[day].assignments[activity.parentActivityCode].judging.push(group.substr(1));
-            } else {
-                warning = `Unhandled assignment code: ${assignment.assignmentCode}`;
-            }
+    var height = 2.5;
+
+    if (!info.blank) {
+        // Header
+        if (settings.includeTimes) {
+            DrawTextBox(doc, "Time", "left", column, row, timeWidth, height);
+            column+=timeWidth;
         }
-
-        // Sort daily schedules by start time
-        var sortedSchedule = []
-        for (let value of Object.values(personalSchedule)) {
-            sortedSchedule.push(value);
+        DrawTextBox(doc, "Event", "left", column, row, eventWidth, height);
+        column+=eventWidth;
+        DrawTextBox(doc, "Group", "left", column, row, groupWidth, height);
+        column+=groupWidth;
+        if (settings.includeStations) {
+            DrawTextBox(doc, "Station", "left", column, row, stationWidth, height);
+            column+=stationWidth;
         }
+        if (settings.includeStaffing) {
+            DrawTextBox(doc, "Staff Groups", "left", column, row, staffWidth, height);
+            column+=staffWidth;
+        }
+        row += height;
+        column = x;
 
-        sortedSchedule.sort((a,b) => {
-            if (a.sortTime < b.sortTime) {
-                return -1;
-            }
-            if (a.sortTime > b.sortTime) {
-                return 1;
-            }
-            return 0;
-        });
+        // For each daily schedule
+        for (var i=0; i<info.sortedSchedule.length; i++) {   
+            // Add day header
+            height = 4;
+            DrawTextBox(doc, weekDaysMap[info.sortedSchedule[i].day], "center", column, row, w, height);
+            row += height;
 
-        // Sort assignments within day by time they start
-        for (var i=0; i<sortedSchedule.length; i++) {   
-            for (let value of Object.values(sortedSchedule[i].assignments)) {
-                sortedSchedule[i].sortedAssignments.push(value);
+            // For each assignment within the day
+            var alternatingColors = 0;
+            for (var j=0; j<info.sortedSchedule[i].sortedAssignments.length; j++) {   
+                var assignment = info.sortedSchedule[i].sortedAssignments[j];
+
+                // If the competitor isn't competing, and we don't show staffing or don't want to show staff only roles in a round
+                // Then don't show this assignment   
+                if (assignment.competing == -1 && (!settings.includeStaffing || settings.hideStaffOnlyAssignments)) {
+                    continue
+                }
+
+                // Determine staffing role text
+                var roleText = "";
+                for (var k=0; k<assignment.judging.length; k++) {
+                    if (k == 0) {
+                        roleText += " Judge:"
+                    }
+                    if (k == 0) {
+                        roleText += ` ${assignment.judging[k]}`
+                    } else {
+                        roleText += `, ${assignment.judging[k]}`
+                    }
+                }
+                for (var k=0; k<assignment.running.length; k++) {
+                    if (k == 0) {
+                        roleText += " Run:"
+                    }
+                    if (k == 0) {
+                        roleText += ` ${assignment.running[k]}`
+                    } else {
+                        roleText += `, ${assignment.running[k]}`
+                    }
+                }
+                for (var k=0; k<assignment.scrambling.length; k++) {
+                    if (k == 0) {
+                        roleText += " Scram:"
+                    }
+                    if (k == 0) {
+                        roleText += ` ${assignment.scrambling[k]}`
+                    } else {
+                        roleText += `, ${assignment.scrambling[k]}`
+                    }
+                }
+
+                roleText = roleText.trimStart();
+
+                var competingGroup = assignment.competing;
+                if (assignment.competing == -1 && settings.includeStaffing) {
+                    competingGroup = "-";
+                }
+
+                // Add assignment to schedule
+                var stationText = "-"
+                if (assignment.competing == -1) {
+                    stationText = `-`;
+                } else if (assignment.stationNumber == null) {
+                    stationText = `any`;
+                } else {
+                    stationText = `${assignment.stationNumber}`;
+                }
+
+                var fillColor = [255,255,255];
+                if (settings.customScheduleColors) {
+                    fillColor = HexToRgb(GetRowColor(alternatingColors, assignment.eventCode, assignment.competing, assignment.stationNumber))
+                } else if (alternatingColors % 2 == 0) {
+                    fillColor = [220,220,220];
+                }
+                alternatingColors++
+                
+                var height = 3.5;
+                if (settings.includeTimes) {
+                    DrawTextBox(doc, assignment.timeText, "left",  column, row, timeWidth, height, fillColor);
+                    column += timeWidth;
+                }
+                DrawTextBox(doc, assignment.eventText, "left",  column, row, eventWidth, height, fillColor, assignment.eventCode);
+                column += eventWidth;
+                DrawTextBox(doc, `${competingGroup}`, "left",  column, row, groupWidth, height, fillColor);
+                column += groupWidth;
+                if (settings.includeStations) {
+                    DrawTextBox(doc, stationText, "left",  column, row, stationWidth, height, fillColor);
+                    column += stationWidth;
+                }
+                if (settings.includeStaffing) {
+                    DrawTextBox(doc, roleText, "left",  column, row, staffWidth, height, fillColor);
+                    column += staffWidth;
+                }
+                row += height;
+                column = x;
             }
-            
-            sortedSchedule[i].sortedAssignments.sort((a,b) => {
-                if (a.sortTime < b.sortTime) {
-                    return -1;
-                }
-                if (a.sortTime > b.sortTime) {
-                    return 1;
-                }
-                return a.eventCode > b.eventCode;
-            });
         }
     }
+
+    return row - y;
+}
+
+// Draws an entire A6 landscape name badge
+function AddLandscapeNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
+
+    var info = GeneratePersonInformation(index);
 
     // ============
     // Create badge
@@ -383,7 +565,7 @@ function AddLandscapeNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
         doc.addImage($("#badge-img")[0], "PNG", 0, 0, A7L_WIDTH, A7L_WIDTH * backgroundRatio, "background", "SLOW");
 
         // Place name, starting from bottom and adding extra lines on top for longer names
-        DrawName(doc, name, "center", 5, 57, A7L_WIDTH - 10, 10)
+        DrawName(doc,  info.name, "center", 5, 57, A7L_WIDTH - 10, 10)
 
         doc.setLineWidth(0.25);
         doc.setDrawColor(0,0,0);
@@ -393,14 +575,14 @@ function AddLandscapeNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
         doc.setFont("NotoSans-Regular")
         doc.setFontSize(13);
         
-        if (!isBlank) {
-            if (wcaid == null) {
+        if (!info.blank) {
+            if (info.wcaid == null) {
                 doc.setTextColor(196,0,0);
                 doc.text("NEWCOMER", A7L_WIDTH/2, 64, {
                     align:"center",
                 });
             } else {
-                doc.text(wcaid, A7L_WIDTH/2, 64, {
+                doc.text(info.wcaid, A7L_WIDTH/2, 64, {
                     align:"center",
                 });
             }
@@ -415,10 +597,10 @@ function AddLandscapeNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
         doc.addImage($("#org-img")[0], "PNG", A7L_WIDTH - (10 * orgRatio) - 3, A7L_HEIGHT - 13, 10 * orgRatio, 10, "org", "SLOW");
 
         // Add country flag
-        if (!isBlank) {
-            var flagRatio = $(`#${countryCode}-flag`).width() / $(`#${countryCode}-flag`).height();
+        if (!info.blank) {
+            var flagRatio = $(`#${info.countryCode}-flag`).width() / $(`#${info.countryCode}-flag`).height();
             var flagWidth = flagRatio * 5;
-            doc.addImage($(`#${countryCode}-flag`)[0], "PNG", (A7L_WIDTH - flagWidth) / 2, A7L_HEIGHT - 8, flagWidth, 5, `${countryCode}-flag`, "SLOW");
+            doc.addImage($(`#${info.countryCode}-flag`)[0], "PNG", (A7L_WIDTH - flagWidth) / 2, A7L_HEIGHT - 8, flagWidth, 5, `${info.countryCode}-flag`, "SLOW");
 
             doc.setLineWidth(0.1);
             doc.setDrawColor(0,0,0);
@@ -435,131 +617,20 @@ function AddLandscapeNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
         doc.setCurrentTransformationMatrix(new doc.Matrix(1, 0, 0, 1, MMtoPDF(tx), MMtoPDF(ty)));
 
         // Place name
-        DrawName(doc, name, "left", 3, 7, A7P_WIDTH - 12, 4)
-        
+        DrawName(doc, info.name, "left", 3, 7, A7P_WIDTH - 12, 4)
+
         // Place registration id
         doc.setFont("NotoSans-Regular")
         doc.setFontSize(5);
-        doc.text(`${compid}`, A7P_WIDTH - 5, 5, {
+        doc.text(`${info.compid}`, A7P_WIDTH - 5, 5, {
             align:"center",
         });
 
-        // Place schedule
-        const TIME_COL = 18;
-        const EVENT_COL = 25;
-        const GROUP_COL = 6;
-        const STATION_COL = 6;
-        const STAFF_COL = 13;
-
-        var startCol = 3;
-        var tableWidth = TIME_COL + EVENT_COL + GROUP_COL + STATION_COL + STAFF_COL
-        if (!settings.includeStations) {
-            startCol += (STATION_COL / 2)
-            tableWidth -= STATION_COL
-        }
-        if (!settings.includeStaffing) {
-            startCol += (STAFF_COL / 2)
-            tableWidth -= STAFF_COL
-        }
-            
-        var row = 10;
-        var column = startCol;
-        var height = 2.5;
-        if (!isBlank) {
-            // Header
-            DrawTextBox(doc, "Time", "left", column, row, TIME_COL, height);
-            column+=TIME_COL;
-            DrawTextBox(doc, "Event", "left", column, row, EVENT_COL, height);
-            column+=EVENT_COL;
-            DrawTextBox(doc, "Group", "left", column, row, GROUP_COL, height);
-            column+=GROUP_COL;
-            if (settings.includeStations) {
-                DrawTextBox(doc, "Station", "left", column, row, STATION_COL, height);
-                column+=STATION_COL;
-            }
-            if (settings.includeStaffing) {
-                DrawTextBox(doc, "Staff Groups", "left", column, row, STAFF_COL, height);
-                column+=STAFF_COL;
-            }
-            row += height;
-            column = startCol;
-
-            // For each daily schedule
-            for (var i=0; i<sortedSchedule.length; i++) {   
-                // Add day header
-                height = 4;
-                DrawTextBox(doc, weekDaysMap[sortedSchedule[i].day], "center", column, row, tableWidth, height);
-                row += height;
-
-                // For each assignment within the day
-                var alternatingColors = 0;
-                for (var j=0; j<sortedSchedule[i].sortedAssignments.length; j++) {   
-                    var assignment = sortedSchedule[i].sortedAssignments[j];
-
-                    // If the competitor isn't competing, and we don't show staffing or don't want to show staff only roles in a round
-                    // Then don't show this assignment   
-                    if (assignment.competing == -1 && (!settings.includeStaffing || settings.hideStaffOnlyAssignments)) {
-                        continue
-                    }
-
-                    // Determine staffing role text
-                    var roleText = "";
-                    for (var k=0; k<assignment.judging.length; k++) {
-                        if (k == 0) {
-                            roleText += "Judge:"
-                        }
-                        if (k == 0) {
-                            roleText += ` ${assignment.judging[k]}`
-                        } else {
-                            roleText += `, ${assignment.judging[k]}`
-                        }
-                    }
-
-                    var competingGroup = assignment.competing;
-                    if (assignment.competing == -1 && settings.includeStaffing) {
-                        competingGroup = "-";
-                    }
-
-                    // Add assignment to schedule
-                    var stationText = "-"
-                    if (assignment.competing == -1) {
-                        stationText = `-`;
-                    } else if (assignment.stationNumber == null) {
-                        stationText = `any`;
-                    } else {
-                        stationText = `${assignment.stationNumber}`;
-                    }
-                    
-                    var fillColor = [255,255,255]
-                    if ((alternatingColors%2) == 0) {
-                        fillColor = [220,220,220]
-                    }
-                    alternatingColors++
-                    
-                    var height = 3.5;
-                    DrawTextBox(doc, assignment.timeText, "left",  column, row, TIME_COL, height, fillColor);
-                    column += TIME_COL;
-                    DrawTextBox(doc, assignment.eventText, "left",  column, row, EVENT_COL, height, fillColor, assignment.eventCode);
-                    column += EVENT_COL;
-                    DrawTextBox(doc, `${competingGroup}`, "left",  column, row, GROUP_COL, height, fillColor);
-                    column += GROUP_COL;
-                    if (settings.includeStations) {
-                        DrawTextBox(doc, stationText, "left",  column, row, STATION_COL, height, fillColor);
-                        column += STATION_COL;
-                    }
-                    if (settings.includeStaffing) {
-                        DrawTextBox(doc, roleText, "left",  column, row, STAFF_COL, height, fillColor);
-                        column += STAFF_COL;
-                    }
-                    row += height;
-                    column = startCol;
-                }
-            }
-        }
+        var height = DrawSchedule(doc, 3, 10, 68, info);
 
         // WCA Live QR code is assumed to be square
         // We don't draw it if the schedule extended down too far
-        if (settings.showWcaLiveQrCode && row < A7P_HEIGHT - 20) {
+        if (settings.showWcaLiveQrCode && (height+10) < A7P_HEIGHT - 20) {
             doc.addImage($("#wca-live-qrcode-img")[0], "PNG", A7P_WIDTH - 18, A7P_HEIGHT - 18, 15, 15, "wca-live-qrcode", "SLOW");
             doc.setFontSize(8);
             doc.setFont("NotoSans-Regular")
@@ -583,109 +654,8 @@ function AddLandscapeNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
 
 // Draws an entire A6 landscape name badge
 function AddPortraitNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
-    // ============================
-    // Information about competitor
-    // ============================
-
-    var isBlank = index >= persons.length;
-    var name = "";
-    var wcaid = null;
-    var compid = "-";
-    var countryCode = "";
-    var personalSchedule = {}
-
-    if (!isBlank) {
-        name = persons[index].name;
-        wcaid = persons[index].wcaId;
-        compid = persons[index].registrantId;
-        countryCode = persons[index].countryIso2.toLowerCase();
-
-        // If a schedule table exists, create a personal schedule for each day
-        // This object holds all assignment information per event, combining staffing and competing 
-        for (var a=0; a<persons[index].assignments.length; a++) {
-            // Check for activity information
-            var assignment = persons[index].assignments[a];
-            var activity = activities[assignment.activityId];
-            if (activities[assignment.activityId] == undefined) {
-                warning = `Missing activity: ${assignment.activityId}`;
-                continue;
-            }
-
-            var startTime = moment(activity.roundStartTime).tz(activity.timezone); 
-            var endTime = moment(activity.roundEndTime).tz(activity.timezone);
-            var day = startTime.day();
-
-            // Create daily information if it doesn't exist
-            if (personalSchedule[day] == undefined) {
-                personalSchedule[day] = {
-                    day: day,
-                    sortTime: startTime.unix(),
-                    assignments: {},
-                    sortedAssignments: [],
-                }
-            }
-
-            var codes = activity.activityCode.split('-')
-            var event = codes[0]
-            var group = codes[2]
-
-            // Create assignment for activity if it doesn't exist
-            if (personalSchedule[day].assignments[activity.parentActivityCode] == undefined) {
-                personalSchedule[day].assignments[activity.parentActivityCode] = {
-                    timeText: `${startTime.format("HH[:]mm")} - ${endTime.format("HH[:]mm")}`,
-                    sortTime: startTime.unix(),
-                    eventCode: event,
-                    eventText: eventMap[event],
-                    competing: -1,
-                    stationNumber: null,
-                    judging: [],
-                };
-            }
-            
-            // Add information to assignment
-            if (assignment.assignmentCode == "competitor") {
-                personalSchedule[day].assignments[activity.parentActivityCode].competing = group.substr(1);
-                personalSchedule[day].assignments[activity.parentActivityCode].stationNumber = assignment.stationNumber;
-            } else if (assignment.assignmentCode == "staff-judge") {
-                personalSchedule[day].assignments[activity.parentActivityCode].judging.push(group.substr(1));
-            } else {
-                warning = `Unhandled assignment code: ${assignment.assignmentCode}`;
-            }
-        }
-
-        // Sort daily schedules by start time
-        var sortedSchedule = []
-        for (let value of Object.values(personalSchedule)) {
-            sortedSchedule.push(value);
-        }
-
-        sortedSchedule.sort((a,b) => {
-            if (a.sortTime < b.sortTime) {
-                return -1;
-            }
-            if (a.sortTime > b.sortTime) {
-                return 1;
-            }
-            return 0;
-        });
-
-        // Sort assignments within day by time they start
-        for (var i=0; i<sortedSchedule.length; i++) {   
-            for (let value of Object.values(sortedSchedule[i].assignments)) {
-                sortedSchedule[i].sortedAssignments.push(value);
-            }
-            
-            sortedSchedule[i].sortedAssignments.sort((a,b) => {
-                if (a.sortTime < b.sortTime) {
-                    return -1;
-                }
-                if (a.sortTime > b.sortTime) {
-                    return 1;
-                }
-                return a.eventCode > b.eventCode;
-            });
-        }
-    }
+    
+    var info = GeneratePersonInformation(index);
 
     // ============
     // Create badge
@@ -703,7 +673,7 @@ function AddPortraitNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
         doc.addImage($("#badge-img")[0], "PNG", 0, 0, A7P_WIDTH, A7P_WIDTH * backgroundRatio, "background", "SLOW");
 
         // Place name, starting from bottom and adding extra lines on top for longer names
-        var textLines = SplitNameOntoTwoLines(doc, name, 10);
+        var textLines = SplitNameOntoTwoLines(doc, info.name, 10);
         DrawName(doc, textLines[0], "center", 3, 71, A7P_WIDTH - 6, 10)
         DrawName(doc, textLines[1], "center", 3, 80, A7P_WIDTH - 6, 10)
 
@@ -715,14 +685,14 @@ function AddPortraitNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
         doc.setFont("NotoSans-Regular")
         doc.setFontSize(13);
         
-        if (!isBlank) {
-            if (wcaid == null) {
+        if (!info.blank) {
+            if (info.wcaid == null) {
                 doc.setTextColor(196,0,0);
                 doc.text("NEWCOMER", A7P_WIDTH/2, 88, {
                     align:"center",
                 });
             } else {
-                doc.text(wcaid, A7P_WIDTH/2, 88, {
+                doc.text(info.wcaid, A7P_WIDTH/2, 88, {
                     align:"center",
                 });
             }
@@ -737,10 +707,10 @@ function AddPortraitNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
         doc.addImage($("#org-img")[0], "PNG", A7P_WIDTH - (10 * orgRatio) - 3, A7P_HEIGHT - 13, 10 * orgRatio, 10, "org", "SLOW");
 
         // Add country flag
-        if (!isBlank) {
-            var flagRatio = $(`#${countryCode}-flag`).width() / $(`#${countryCode}-flag`).height();
+        if (!info.blank) {
+            var flagRatio = $(`#${info.countryCode}-flag`).width() / $(`#${info.countryCode}-flag`).height();
             var flagWidth = flagRatio * 5;
-            doc.addImage($(`#${countryCode}-flag`)[0], "PNG", (A7P_WIDTH - flagWidth) / 2, A7P_HEIGHT - 15, flagWidth, 5, `${countryCode}-flag`, "SLOW");
+            doc.addImage($(`#${info.countryCode}-flag`)[0], "PNG", (A7P_WIDTH - flagWidth) / 2, A7P_HEIGHT - 15, flagWidth, 5, `${info.countryCode}-flag`, "SLOW");
 
             doc.setLineWidth(0.1);
             doc.setDrawColor(0,0,0);
@@ -757,131 +727,21 @@ function AddPortraitNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
         doc.setCurrentTransformationMatrix(new doc.Matrix(1, 0, 0, 1, MMtoPDF(tx), MMtoPDF(ty)));
 
         // Place name
-        DrawName(doc, name, "left", 3, 7, A7P_WIDTH - 12, 4)
+        DrawName(doc, info.name, "left", 3, 7, A7P_WIDTH - 12, 4)
         
         // Place registration id
         doc.setFont("NotoSans-Regular")
         doc.setFontSize(5);
-        doc.text(`${compid}`, A7P_WIDTH - 5, 5, {
+        doc.text(`${info.compid}`, A7P_WIDTH - 5, 5, {
             align:"center",
         });
 
         // Place schedule
-        const TIME_COL = 18;
-        const EVENT_COL = 25;
-        const GROUP_COL = 6;
-        const STATION_COL = 6;
-        const STAFF_COL = 13;
-
-        var startCol = 3;
-        var tableWidth = TIME_COL + EVENT_COL + GROUP_COL + STATION_COL + STAFF_COL
-        if (!settings.includeStations) {
-            startCol += (STATION_COL / 2)
-            tableWidth -= STATION_COL
-        }
-        if (!settings.includeStaffing) {
-            startCol += (STAFF_COL / 2)
-            tableWidth -= STAFF_COL
-        }
-            
-        var row = 10;
-        var column = startCol;
-        var height = 2.5;
-        if (!isBlank) {
-            // Header
-            DrawTextBox(doc, "Time", "left", column, row, TIME_COL, height);
-            column+=TIME_COL;
-            DrawTextBox(doc, "Event", "left", column, row, EVENT_COL, height);
-            column+=EVENT_COL;
-            DrawTextBox(doc, "Group", "left", column, row, GROUP_COL, height);
-            column+=GROUP_COL;
-            if (settings.includeStations) {
-                DrawTextBox(doc, "Station", "left", column, row, STATION_COL, height);
-                column+=STATION_COL;
-            }
-            if (settings.includeStaffing) {
-                DrawTextBox(doc, "Staff Groups", "left", column, row, STAFF_COL, height);
-                column+=STAFF_COL;
-            }
-            row += height;
-            column = startCol;
-
-            // For each daily schedule
-            for (var i=0; i<sortedSchedule.length; i++) {   
-                // Add day header
-                height = 4;
-                DrawTextBox(doc, weekDaysMap[sortedSchedule[i].day], "center", column, row, tableWidth, height);
-                row += height;
-
-                // For each assignment within the day
-                var alternatingColors = 0;
-                for (var j=0; j<sortedSchedule[i].sortedAssignments.length; j++) {   
-                    var assignment = sortedSchedule[i].sortedAssignments[j];
-
-                    // If the competitor isn't competing, and we don't show staffing or don't want to show staff only roles in a round
-                    // Then don't show this assignment   
-                    if (assignment.competing == -1 && (!settings.includeStaffing || settings.hideStaffOnlyAssignments)) {
-                        continue
-                    }
-
-                    // Determine staffing role text
-                    var roleText = "";
-                    for (var k=0; k<assignment.judging.length; k++) {
-                        if (k == 0) {
-                            roleText += "Judge:"
-                        }
-                        if (k == 0) {
-                            roleText += ` ${assignment.judging[k]}`
-                        } else {
-                            roleText += `, ${assignment.judging[k]}`
-                        }
-                    }
-
-                    var competingGroup = assignment.competing;
-                    if (assignment.competing == -1 && settings.includeStaffing) {
-                        competingGroup = "-";
-                    }
-
-                    // Add assignment to schedule
-                    var stationText = "-"
-                    if (assignment.competing == -1) {
-                        stationText = `-`;
-                    } else if (assignment.stationNumber == null) {
-                        stationText = `any`;
-                    } else {
-                        stationText = `${assignment.stationNumber}`;
-                    }
-                    
-                    var fillColor = [255,255,255]
-                    if ((alternatingColors%2) == 0) {
-                        fillColor = [220,220,220]
-                    }
-                    alternatingColors++
-                    
-                    var height = 3.5;
-                    DrawTextBox(doc, assignment.timeText, "left",  column, row, TIME_COL, height, fillColor);
-                    column += TIME_COL;
-                    DrawTextBox(doc, assignment.eventText, "left",  column, row, EVENT_COL, height, fillColor, assignment.eventCode);
-                    column += EVENT_COL;
-                    DrawTextBox(doc, `${competingGroup}`, "left",  column, row, GROUP_COL, height, fillColor);
-                    column += GROUP_COL;
-                    if (settings.includeStations) {
-                        DrawTextBox(doc, stationText, "left",  column, row, STATION_COL, height, fillColor);
-                        column += STATION_COL;
-                    }
-                    if (settings.includeStaffing) {
-                        DrawTextBox(doc, roleText, "left",  column, row, STAFF_COL, height, fillColor);
-                        column += STAFF_COL;
-                    }
-                    row += height;
-                    column = startCol;
-                }
-            }
-        }
+        var height = DrawSchedule(doc, 3, 10, 68, info);
 
         // WCA Live QR code is assumed to be square
         // We don't draw it if the schedule extended down too far
-        if (settings.showWcaLiveQrCode && row < A7P_HEIGHT - 20) {
+        if (settings.showWcaLiveQrCode && (height+10) < A7P_HEIGHT - 20) {
             doc.addImage($("#wca-live-qrcode-img")[0], "PNG", A7P_WIDTH - 18, A7P_HEIGHT - 18, 15, 15, "wca-live-qrcode", "SLOW");
             doc.setFontSize(8);
             doc.setFont("NotoSans-Regular")
@@ -1131,7 +991,7 @@ function MakeA6PortraitBadges() {
 }
 
 function MakeA4PortraitBadges() {
-    // Name badges
+    // Name badges 
     globalDoc = new jspdf.jsPDF({
         orientation: 'l',
         unit:'mm',
@@ -1219,7 +1079,6 @@ function MakeCertificates() {
 }
 
 function CreateTintedImage(img, color) {
-    console.log(img)
     var w = img.width;
     var h = img.height;
 

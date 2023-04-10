@@ -125,6 +125,12 @@ title: Badgifier
                             </label>
                         </div>
                         <div class="form-check">
+                            <input checked class="form-check-input" type="checkbox" id="includeTimes" onclick="settings.includeTimes = this.checked">
+                            <label class="form-check-label" for="includeTimes">
+                                Include times in schedules   
+                            </label>
+                        </div>
+                        <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="hideStaffOnly" onclick="settings.hideStaffOnlyAssignments = this.checked">
                             <label class="form-check-label" for="hideStaffOnly">
                                 Hide staff only assignments in schedule
@@ -135,6 +141,17 @@ title: Badgifier
                             <label class="form-check-label" for="includeQRCode">
                                 Include WCA Live QR code with schedules
                             </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="customScheduleColors" onclick="settings.customScheduleColors = this.checked" onchange="UseCustomColorChanged()">
+                            <label class="form-check-label" for="customScheduleColors">
+                                Use custom row colors in schedules
+                            </label>
+                        </div>
+                        <div id="customColors">
+                            <hr>
+                            <p>Use JavaScript to set the background color for each row in the schedule. You can set schedule colors according to your competition structure (e.g different colors to match different stages, rooms, etc). Your code will be ran for each row with some information about the scheduled group. It sets the color for the row based on the input information.</p>
+                            <textarea class="form-control" id="customColorsCode" rows="20"></textarea>
                         </div>
                     </span>
                     <span class="certificate-only">
@@ -204,7 +221,7 @@ title: Badgifier
                 </div>
             </div>
 
-            <p>Version 2.3.0</p>
+            <p>Version 2.4.0</p>
 
             <div id="hidden-images">
                 <img style="display: none;" id="org-img" src="./images/sca.png"/>

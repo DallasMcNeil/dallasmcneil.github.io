@@ -39,3 +39,7 @@
 #status.error {
     color: #ff0000;
 }
+
+#customColorsCode {
+    font-family: "Lucida Console", Courier, monospace;
+}

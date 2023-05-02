@@ -812,10 +812,10 @@ function AddCertificate(doc, eventIndex, place, dateText, tintedImage) {
     doc.addImage($("#org-img")[0], "PNG", A4L_WIDTH - logoMargins[0] - (logoHeight * orgRatio), logoMargins[1], logoHeight * orgRatio, logoHeight, "org", "SLOW");
 
     // Add Main text
-    doc.setFont("Fenix-Regular");
+    doc.setFont("Barmeno-Regular")
     doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-    DrawText(doc, wcif.name, "center", 10, 78, A4L_WIDTH - 20, 21);
-    DrawText(doc, eventText, "center", 10, 97, A4L_WIDTH - 20, 21);
+    DrawText(doc, wcif.name, "center", 10, 76, A4L_WIDTH - 20, 21);
+    DrawText(doc, eventText, "center", 10, 95, A4L_WIDTH - 20, 21);
     DrawText(doc, placeText, "center", 10, 108, A4L_WIDTH - 20, 11);
     doc.setFontSize(22);
     doc.text(resultPrefixText, (A4L_WIDTH/2) - 2, 139, {

@@ -131,6 +131,12 @@ title: Badgifier
                             </label>
                         </div>
                         <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="includeCompetitorId" onclick="settings.includeCompetitorId = this.checked">
+                            <label class="form-check-label" for="includeCompetitorId">
+                                Include competitor ID on front  
+                            </label>
+                        </div>
+                        <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="hideStaffOnly" onclick="settings.hideStaffOnlyAssignments = this.checked">
                             <label class="form-check-label" for="hideStaffOnly">
                                 Hide staff only assignments in schedule
@@ -221,7 +227,7 @@ title: Badgifier
                 </div>
             </div>
 
-            <p>Version 2.4.0</p>
+            <p>Version 2.5.0</p>
 
             <div id="hidden-images">
                 <img style="display: none;" id="org-img" src="./images/sca.png"/>

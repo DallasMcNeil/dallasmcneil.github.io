@@ -565,7 +565,7 @@ function AddLandscapeNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
         doc.addImage($("#badge-img")[0], "PNG", 0, 0, A7L_WIDTH, A7L_WIDTH * backgroundRatio, "background", "SLOW");
 
         // Place name, starting from bottom and adding extra lines on top for longer names
-        DrawName(doc,  info.name, "center", 5, 57, A7L_WIDTH - 10, 10)
+        DrawName(doc, info.name, "center", 5, 57, A7L_WIDTH - 10, 10)
 
         doc.setLineWidth(0.25);
         doc.setDrawColor(0,0,0);
@@ -574,18 +574,20 @@ function AddLandscapeNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
         // Place WCA ID
         doc.setFont("NotoSans-Regular")
         doc.setFontSize(13);
-        
+
         if (!info.blank) {
+            var nameText = info.wcaid;
             if (info.wcaid == null) {
                 doc.setTextColor(196,0,0);
-                doc.text("NEWCOMER", A7L_WIDTH/2, 64, {
-                    align:"center",
-                });
-            } else {
-                doc.text(info.wcaid, A7L_WIDTH/2, 64, {
-                    align:"center",
-                });
+                nameText = "NEWCOMER"
             }
+            if (settings.includeCompetitorId) {
+                nameText += ` - ID ${info.compid}` 
+            }
+            
+            doc.text(nameText, A7L_WIDTH/2, 64, {
+                align:"center",
+            });
         }
         doc.setTextColor(0,0,0);
 
@@ -621,8 +623,8 @@ function AddLandscapeNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
 
         // Place registration id
         doc.setFont("NotoSans-Regular")
-        doc.setFontSize(5);
-        doc.text(`${info.compid}`, A7P_WIDTH - 5, 5, {
+        doc.setFontSize(7);
+        doc.text(`${info.compid}`, A7P_WIDTH - 6, 6, {
             align:"center",
         });
 
@@ -686,16 +688,18 @@ function AddPortraitNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
         doc.setFontSize(13);
         
         if (!info.blank) {
+            var nameText = info.wcaid;
             if (info.wcaid == null) {
                 doc.setTextColor(196,0,0);
-                doc.text("NEWCOMER", A7P_WIDTH/2, 88, {
-                    align:"center",
-                });
-            } else {
-                doc.text(info.wcaid, A7P_WIDTH/2, 88, {
-                    align:"center",
-                });
+                nameText = "NEWCOMER"
             }
+            if (settings.includeCompetitorId) {
+                nameText += ` - ID ${info.compid}` 
+            }
+            
+            doc.text(nameText,  A7P_WIDTH/2, 88, {
+                align:"center",
+            });
         }
         doc.setTextColor(0,0,0);
 
@@ -731,8 +735,8 @@ function AddPortraitNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
         
         // Place registration id
         doc.setFont("NotoSans-Regular")
-        doc.setFontSize(5);
-        doc.text(`${info.compid}`, A7P_WIDTH - 5, 5, {
+        doc.setFontSize(7);
+        doc.text(`${info.compid}`, A7P_WIDTH - 6, 6, {
             align:"center",
         });
 

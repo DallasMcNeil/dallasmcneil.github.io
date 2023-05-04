@@ -49,6 +49,7 @@ var settings = {
     includeStaffing: true,
     includeStations: true,
     includeLocalName: false,
+    includeCompetitorId: false,
     hideStaffOnlyAssignments: false,
     showWcaLiveQrCode: true,
     customScheduleColors: false,

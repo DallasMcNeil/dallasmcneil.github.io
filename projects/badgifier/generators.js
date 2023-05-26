@@ -67,6 +67,9 @@ function GeneratePersonInformation(index) {
             var codes = activity.activityCode.split('-')
             var event = codes[0]
             var group = codes[2]
+            if (group == undefined) {
+                group = "-1"
+            }
 
             // Create assignment for activity if it doesn't exist
             if (personalSchedule[day].assignments[activity.parentActivityCode] == undefined) {

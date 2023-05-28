@@ -78,6 +78,8 @@ function GeneratePersonInformation(index) {
                     sortTime: startTime.unix(),
                     eventCode: event,
                     eventText: eventMap[event],
+                    stageText: activity.roomName,
+                    stageColor: activity.roomColor,
                     competing: -1,
                     stationNumber: null,
                     judging: [],
@@ -378,7 +380,7 @@ function DrawText(doc, text, align, x, y, w, h) {
 }
 
 
-function GetRowColor(row, event, group, station) {
+function GetRowColor(row, event, group, station, room) {
     let color = "#FFFFFF";
     eval(settings.customScheduleColorsCode);
     return color;
@@ -389,11 +391,12 @@ function GetRowColor(row, event, group, station) {
 function DrawSchedule(doc, x, y, w, info) {
 
     // Place schedule
-    const TIME_RATIO = 0.26;
-    const EVENT_RATIO = 0.37;
-    const GROUP_RATIO = 0.09;
-    const STATION_RATIO = 0.09;
-    const STAFF_RATIO = 0.19;
+    const TIME_RATIO = 0.21;
+    const EVENT_RATIO = 0.31;
+    const GROUP_RATIO = 0.07;
+    const STAGE_RATIO = 0.18;
+    const STATION_RATIO = 0.07;
+    const STAFF_RATIO = 0.16;
 
     var scale = EVENT_RATIO + GROUP_RATIO;
 
@@ -406,12 +409,16 @@ function DrawSchedule(doc, x, y, w, info) {
     if (settings.includeStaffing) {
         scale += STAFF_RATIO;
     }
+    if (settings.includeStages) {
+        scale += STAGE_RATIO;
+    }
 
     let timeWidth = (w * TIME_RATIO) / scale;
     let eventWidth = (w * EVENT_RATIO) / scale;
     let groupWidth = (w * GROUP_RATIO) / scale;
     let stationWidth = (w * STATION_RATIO) / scale;
     let staffWidth = (w * STAFF_RATIO) / scale;
+    let stageWidth = (w * STAGE_RATIO) / scale;
         
     var row = y;
     var column = x;
@@ -426,6 +433,10 @@ function DrawSchedule(doc, x, y, w, info) {
         }
         DrawTextBox(doc, "Event", "left", column, row, eventWidth, height);
         column+=eventWidth;
+        if (settings.includeStages) {
+            DrawTextBox(doc, "Stage", "left", column, row, stageWidth, height);
+            column+=stageWidth;
+        }
         DrawTextBox(doc, "Group", "left", column, row, groupWidth, height);
         column+=groupWidth;
         if (settings.includeStations) {
@@ -459,11 +470,14 @@ function DrawSchedule(doc, x, y, w, info) {
 
                 // Determine staffing role text
                 var roleText = "";
+                var roleTypeCount = 0;
+                roleTypeCount += assignment.judging.length ? 1 : 0; 
+                roleTypeCount += assignment.running.length ? 1 : 0; 
+                roleTypeCount += assignment.scrambling.length ? 1 : 0;
+                var shortRoles = roleTypeCount > 1;
                 for (var k=0; k<assignment.judging.length; k++) {
                     if (k == 0) {
-                        roleText += " Judge:"
-                    }
-                    if (k == 0) {
+                        roleText += shortRoles ? " J:" : " Judge:";
                         roleText += ` ${assignment.judging[k]}`
                     } else {
                         roleText += `, ${assignment.judging[k]}`
@@ -471,19 +485,15 @@ function DrawSchedule(doc, x, y, w, info) {
                 }
                 for (var k=0; k<assignment.running.length; k++) {
                     if (k == 0) {
-                        roleText += " Run:"
-                    }
-                    if (k == 0) {
-                        roleText += ` ${assignment.running[k]}`
+                        roleText += shortRoles ? " R:" : " Run:";
+                        roleText += ` R: ${assignment.running[k]}`
                     } else {
                         roleText += `, ${assignment.running[k]}`
                     }
                 }
                 for (var k=0; k<assignment.scrambling.length; k++) {
                     if (k == 0) {
-                        roleText += " Scram:"
-                    }
-                    if (k == 0) {
+                        roleText += shortRoles ? " S:" : " Scram:";
                         roleText += ` ${assignment.scrambling[k]}`
                     } else {
                         roleText += `, ${assignment.scrambling[k]}`
@@ -509,7 +519,9 @@ function DrawSchedule(doc, x, y, w, info) {
 
                 var fillColor = [255,255,255];
                 if (settings.customScheduleColors) {
-                    fillColor = HexToRgb(GetRowColor(alternatingColors, assignment.eventCode, assignment.competing, assignment.stationNumber))
+                    fillColor = HexToRgb(GetRowColor(alternatingColors, assignment.eventCode, assignment.competing, assignment.stationNumber, assignment.stageText))
+                } else if (settings.colorFromStage) {
+                    fillColor = assignment.stageColor;
                 } else if (alternatingColors % 2 == 0) {
                     fillColor = [220,220,220];
                 }
@@ -522,6 +534,10 @@ function DrawSchedule(doc, x, y, w, info) {
                 }
                 DrawTextBox(doc, assignment.eventText, "left",  column, row, eventWidth, height, fillColor, assignment.eventCode);
                 column += eventWidth;
+                if (settings.includeStages) {
+                    DrawTextBox(doc, assignment.stageText, "left",  column, row, stageWidth, height, fillColor);
+                    column += stageWidth;
+                }
                 DrawTextBox(doc, `${competingGroup}`, "left",  column, row, groupWidth, height, fillColor);
                 column += groupWidth;
                 if (settings.includeStations) {

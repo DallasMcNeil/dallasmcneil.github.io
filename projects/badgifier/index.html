@@ -106,28 +106,37 @@ title: Badgifier
                     <hr>
 
                     <span class="badge-only">
+                        <p>Schedule Columns</p>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="includeLocalName" onclick="settings.includeLocalName = this.checked">
-                            <label class="form-check-label" for="includeLocalName">
-                                Include local names
+                            <input checked class="form-check-input" type="checkbox" id="includeTimes" onclick="settings.includeTimes = this.checked">
+                            <label class="form-check-label" for="includeTimes">
+                                Include times in schedules   
                             </label>
                         </div>
                         <div class="form-check">
-                            <input checked class="form-check-input" type="checkbox" id="includeStations" onclick="settings.includeStations = this.checked">
+                            <input class="form-check-input" type="checkbox" id="includeStages" onclick="settings.includeStages = this.checked">
+                            <label class="form-check-label" for="includeStages">
+                                Include stages in schedules
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="includeStations" onclick="settings.includeStations = this.checked">
                             <label class="form-check-label" for="includeStations">
                                 Include stations in schedules
                             </label>
                         </div>
                         <div class="form-check">
-                            <input checked class="form-check-input" type="checkbox" id="includeStaffing" onclick="settings.includeStaffing = this.checked">
+                            <input class="form-check-input" type="checkbox" id="includeStaffing" onclick="settings.includeStaffing = this.checked">
                             <label class="form-check-label" for="includeStaffing">
                                 Include staffing in schedules
                             </label>
                         </div>
+                        <hr>
+                        <p>Options</p>
                         <div class="form-check">
-                            <input checked class="form-check-input" type="checkbox" id="includeTimes" onclick="settings.includeTimes = this.checked">
-                            <label class="form-check-label" for="includeTimes">
-                                Include times in schedules   
+                            <input class="form-check-input" type="checkbox" id="includeLocalName" onclick="settings.includeLocalName = this.checked">
+                            <label class="form-check-label" for="includeLocalName">
+                                Include local names
                             </label>
                         </div>
                         <div class="form-check">
@@ -146,6 +155,12 @@ title: Badgifier
                             <input checked class="form-check-input" type="checkbox" id="includeQRCode" onclick="settings.showWcaLiveQrCode = this.checked">
                             <label class="form-check-label" for="includeQRCode">
                                 Include WCA Live QR code with schedules
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="colorFromStage" onclick="settings.colorFromStage = this.checked">
+                            <label class="form-check-label" for="colorFromStage">
+                                Color rows based on stage color
                             </label>
                         </div>
                         <div class="form-check">
@@ -227,7 +242,7 @@ title: Badgifier
                 </div>
             </div>
 
-            <p>Version 2.5.1</p>
+            <p>Version 2.6.0</p>
 
             <div id="hidden-images">
                 <img style="display: none;" id="org-img" src="./images/sca.png"/>

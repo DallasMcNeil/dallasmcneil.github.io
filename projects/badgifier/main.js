@@ -46,14 +46,16 @@ var settings = {
     template: 0,
     // Badge settings
     includeTimes: true,
-    includeStaffing: true,
-    includeStations: true,
+    includeStaffing: false,
+    includeStations: false,
+    includeStages: false,
     includeLocalName: false,
     includeCompetitorId: false,
     hideStaffOnlyAssignments: false,
     showWcaLiveQrCode: true,
     customScheduleColors: false,
     customScheduleColorsCode: "",
+    colorFromStage: false,
     // Certificate settings
     certOrganiser: "Name",
     certRole: "WCA DELEGATE",
@@ -91,12 +93,20 @@ function GetActivities() {
             for (var a=0; a<room.activities.length; a++) {
                 var activity = room.activities[a];
 
+                // Room color is a mix between room color and white for visibility
+                var roomColor = HexToRgb(room.color);
+                roomColor[0] = (255 + roomColor[0]) / 2;
+                roomColor[1] = (255 + roomColor[1]) / 2;
+                roomColor[2] = (255 + roomColor[2]) / 2;
+
                 activities[activity.id] = {
                     parentActivityCode: activity.activityCode,
                     activityCode: activity.activityCode,
                     roundStartTime: activity.startTime,
                     roundEndTime: activity.endTime,
                     timezone: venue.timezone,
+                    roomName: room.name, 
+                    roomColor: roomColor, 
                 }
 
                 for (var c=0; c<activity.childActivities.length; c++) {
@@ -108,6 +118,8 @@ function GetActivities() {
                         roundStartTime: activity.startTime,
                         roundEndTime: activity.endTime,
                         timezone: venue.timezone,
+                        roomName: room.name, 
+                        roomColor: roomColor, 
                     }
                 }
             }
@@ -317,6 +329,7 @@ $(document).ready(function () {
     $("#customColorsCode").val(`// Input variables
 // event: string; the event code (e.g '333', 'pyra')
 // group: number; the group number, 1 or higher. If no group, then null
+// room: string; the name of the stage/room
 // station: number; the station number, 1 or higher. If no station, then null
 // row: number; the row number in the schedule for each day, 0 or higher
 // Output variable

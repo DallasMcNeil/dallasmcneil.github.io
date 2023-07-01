@@ -1,6 +1,8 @@
 
 const A4L_WIDTH = 297
 const A4L_HEIGHT = 210
+const A4P_WIDTH = 210
+const A4P_HEIGHT = 297
 const A6L_WIDTH = 148.5
 const A6L_HEIGHT = 105
 const A6P_WIDTH = 105
@@ -151,7 +153,7 @@ function GeneratePersonInformation(index) {
 // e.g text = "Latin Name (LocalName)"
 // x,y,w,h specifies box for text to be located in
 // align specifies if text should be left aligned or centred within box
-function DrawName(doc, text, align, x, y, w, h) {
+function DrawName(doc, text, align, x, y, w, h, latinFont="NotoSans-Bold") {
     // Determine names
     const [, latinName, localName] = text.match(/(.*)\s*[(（](.+)[)）]/) || [null, text, null];
 
@@ -164,7 +166,7 @@ function DrawName(doc, text, align, x, y, w, h) {
         console.log(`Local name ${localName} with font ${localFont}`)
 
         // Find lengths of all text componenets
-        doc.setFont("NotoSans-Bold")
+        doc.setFont(latinFont)
         doc.setFontSize(fontSize);
 
         var startString = latinName == "" ? "(" : `${latinName} (`;
@@ -185,7 +187,7 @@ function DrawName(doc, text, align, x, y, w, h) {
         var horizontalScale = Math.min(1, w / (length1 + length2 + length3));
 
         // Draw text components
-        doc.setFont("NotoSans-Bold")
+        doc.setFont(latinFont)
         doc.text(startString, x + xPadding, y, {
             align:"left",
             horizontalScale: horizontalScale,
@@ -203,7 +205,7 @@ function DrawName(doc, text, align, x, y, w, h) {
 
     } else {
         // Just latin text to be drawn
-        doc.setFont("NotoSans-Bold")
+        doc.setFont(latinFont)
         doc.setFontSize(fontSize);
         var textWidth = doc.getTextWidth(latinName);
         var horizontalScale = Math.min(1, w / textWidth);
@@ -872,8 +874,6 @@ function MakeDocument() {
         return false;
     }
 
-    //let regionNames = new Intl.DisplayNames(['en'], {type: 'region'});
-
     // Name badges should only be for accepted people and in alphabetical order
     persons = wcif.persons.filter((a) => {
         if (a.registration != null) {
@@ -884,12 +884,16 @@ function MakeDocument() {
         return false;
     })
 
+    var template = templates[settings.template];
+
     persons.sort((a,b) => {
-        if (a.wcaId == null && b.wcaId != null) {
-            return -1
-        }
-        if (a.wcaId != null && b.wcaId == null) {
-            return 1
+        if (template.newcomersFirst) {
+            if (a.wcaId == null && b.wcaId != null) {
+                return -1
+            }
+            if (a.wcaId != null && b.wcaId == null) {
+                return 1
+            }
         }
         if (a.name < b.name) {
             return -1;
@@ -900,7 +904,6 @@ function MakeDocument() {
         return 0;
     });
 
-    var template = templates[settings.template];
     template.generationFunction();
 
     return true;
@@ -1096,6 +1099,107 @@ function MakeCertificates() {
                 break;
             }
         }
+    }
+
+    return true;
+}
+
+function MakeParticipationCertificates() {
+    // Name badges
+    globalDoc = new jspdf.jsPDF({
+        orientation: 'p',
+        unit:'mm',
+        format:'a4',
+    });
+
+    let regionNames = new Intl.DisplayNames(['en'], {type: 'region'});
+
+    // Keep track of pages and badges
+    var index = 0;
+    while (true) {
+        if (index >= (persons.length)) {
+            break;
+        }
+
+        // Create a new page
+        if (index != 0) {
+            globalDoc.addPage("a4", "p");
+        }
+        
+        var info = GeneratePersonInformation(index);
+
+        const BASE = 129;
+
+        var backgroundRatio = $("#badge-img").height() / $("#badge-img").width();
+        globalDoc.addImage($("#badge-img")[0], "PNG", 0, 0, A4P_WIDTH, A4P_WIDTH * backgroundRatio, "background", "SLOW");
+        
+        // Place name, starting from bottom and adding extra lines on top for longer names
+        DrawName(globalDoc , info.name, "center", 10, BASE + 13, A4P_WIDTH - 20, 20, "Oswald-SemiBold")
+
+        // Place WCA
+        if (info.wcaid != null) {
+            globalDoc.setFont("Oswald-SemiBold")
+            globalDoc.setFontSize(25);
+            var nameText = ""+info.wcaid;
+            globalDoc.text(nameText, A4P_WIDTH/2, BASE + 25, {
+                align:"center",
+            });
+        }
+
+        // Add representing
+        globalDoc.setFont("Oswald-Regular")
+        globalDoc.setFontSize(20);
+        globalDoc.text("Representing", A4P_WIDTH/2, BASE + 36, {
+            align:"center",
+        });
+
+        // Add country flag and name
+        var flagRatio = $(`#${info.countryCode}-flag`).width() / $(`#${info.countryCode}-flag`).height();
+        var flagWidth = flagRatio * 20;
+        globalDoc.addImage($(`#${info.countryCode}-flag`)[0], "PNG", (A4P_WIDTH - flagWidth) / 2, BASE + 40, flagWidth, 20, `${info.countryCode}-flag`, "SLOW");
+        globalDoc.setLineWidth(0.4);
+        globalDoc.setDrawColor(0,0,0);
+        globalDoc.rect((A4P_WIDTH - flagWidth) / 2, BASE + 40, flagWidth, 20);
+        
+        globalDoc.setFontSize(20);
+        globalDoc.text(regionNames.of(persons[index].countryIso2.toUpperCase()), A4P_WIDTH/2, BASE + 67, {
+            align:"center",
+        });
+        
+        // Add qualifying text
+        globalDoc.setFontSize(20);
+        var nameText = info.wcaid;
+        globalDoc.text("Qualified and Participated in", A4P_WIDTH/2, BASE + 80, {
+            align:"center",
+        });
+
+        // Add events
+        var inEvents = new Array(eventCount).fill(false);
+        for (var a=0; a<persons[index].assignments.length; a++) {
+            var assignment = persons[index].assignments[a]; 
+            var activity = activities[assignment.activityId];                        
+            var codes = activity.activityCode.split('-')
+            var event = codes[0]
+            if (assignment.assignmentCode == "competitor") {
+                inEvents[eventOrder[event]] = true;
+            }
+        }
+
+        var eventText = ""
+        for (var e=0; e<eventCount; e++) {
+            if (inEvents[e]) {
+                eventText += eventCharacters[eventOrderName[e]];
+            }
+        }
+
+        globalDoc.setFontSize(30);
+        globalDoc.setFont("cubing-icons")
+        globalDoc.text(eventText, A4P_WIDTH/2, BASE + 93, {
+            align:"center",
+            horizontalScale: 1,
+        });
+
+        index+=1;
     }
 
     return true;

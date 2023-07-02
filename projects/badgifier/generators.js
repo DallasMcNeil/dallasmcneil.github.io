@@ -625,9 +625,11 @@ function AddLandscapeNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
             var flagWidth = flagRatio * 5;
             doc.addImage($(`#${info.countryCode}-flag`)[0], "PNG", (A7L_WIDTH - flagWidth) / 2, A7L_HEIGHT - 8, flagWidth, 5, `${info.countryCode}-flag`, "SLOW");
 
-            doc.setLineWidth(0.1);
-            doc.setDrawColor(0,0,0);
-            doc.rect((A7L_WIDTH - flagWidth) / 2, A7L_HEIGHT - 8, flagWidth, 5);
+            if (noFlagBorders[info.countryCode.toUpperCase()] == undefined) {
+                doc.setLineWidth(0.1);
+                doc.setDrawColor(0,0,0);
+                doc.rect((A7L_WIDTH - flagWidth) / 2, A7L_HEIGHT - 8, flagWidth, 5);
+            }
         }
 
         doc.restoreGraphicsState();
@@ -737,9 +739,11 @@ function AddPortraitNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
             var flagWidth = flagRatio * 5;
             doc.addImage($(`#${info.countryCode}-flag`)[0], "PNG", (A7P_WIDTH - flagWidth) / 2, A7P_HEIGHT - 15, flagWidth, 5, `${info.countryCode}-flag`, "SLOW");
 
-            doc.setLineWidth(0.1);
-            doc.setDrawColor(0,0,0);
-            doc.rect((A7P_WIDTH - flagWidth) / 2, A7P_HEIGHT - 15, flagWidth, 5);
+            if (noFlagBorders[info.countryCode.toUpperCase()] == undefined) {
+                doc.setLineWidth(0.1);
+                doc.setDrawColor(0,0,0);
+                doc.rect((A7P_WIDTH - flagWidth) / 2, A7P_HEIGHT - 15, flagWidth, 5);
+            }
         }
 
         doc.restoreGraphicsState();
@@ -1112,8 +1116,6 @@ function MakeParticipationCertificates() {
         format:'a4',
     });
 
-    let regionNames = new Intl.DisplayNames(['en'], {type: 'region'});
-
     // Keep track of pages and badges
     var index = 0;
     while (true) {
@@ -1157,12 +1159,14 @@ function MakeParticipationCertificates() {
         var flagRatio = $(`#${info.countryCode}-flag`).width() / $(`#${info.countryCode}-flag`).height();
         var flagWidth = flagRatio * 20;
         globalDoc.addImage($(`#${info.countryCode}-flag`)[0], "PNG", (A4P_WIDTH - flagWidth) / 2, BASE + 40, flagWidth, 20, `${info.countryCode}-flag`, "SLOW");
-        globalDoc.setLineWidth(0.4);
-        globalDoc.setDrawColor(0,0,0);
-        globalDoc.rect((A4P_WIDTH - flagWidth) / 2, BASE + 40, flagWidth, 20);
+        if (noFlagBorders[info.countryCode.toUpperCase()] == undefined) {
+            globalDoc.setLineWidth(0.4);
+            globalDoc.setDrawColor(0,0,0);
+            globalDoc.rect((A4P_WIDTH - flagWidth) / 2, BASE + 40, flagWidth, 20);
+        }
         
         globalDoc.setFontSize(20);
-        globalDoc.text(regionNames.of(persons[index].countryIso2.toUpperCase()), A4P_WIDTH/2, BASE + 67, {
+        globalDoc.text(getCountryName(persons[index].countryIso2), A4P_WIDTH/2, BASE + 67, {
             align:"center",
         });
         

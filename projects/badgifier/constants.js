@@ -115,3 +115,60 @@ const eventCharacters = {
 // Special case text for certain events
 const multiblindFormatText = "Best result:"
 const fewestMovesFormatText = "Moves:"
+
+const localizedNames = {
+    AG: "Antigua and Barbuda",
+    BA: "Bosnia and Herzegovina",
+    CD: "Democratic Republic of the Congo",
+    CG: "Congo",
+    CI: "Côte d'Ivoire",
+    CV: "Cabo Verde",
+    FM: "Federated States of Micronesia",
+    GW: "Guinea Bissau",
+    HK: "Hong Kong, China",
+    KN: "Saint Kitts and Nevis",
+    KP: "Democratic People's Republic of Korea",
+    KR: "Republic of Korea",
+    LC: "Saint Lucia",
+    MK: "North Macedonia",
+    MM: "Myanmar",
+    MO: "Macau, China",
+    PS: "Palestine",
+    ST: "São Tomé and Príncipe",
+    SZ: "Eswatini",
+    TT: "Trinidad and Tobago",
+    TW: "Chinese Taipei",
+    VC: "Saint Vincent and the Grenadines",
+    XF: "Multiple Countries (Africa)",
+    XM: "Multiple Countries (Americas)",
+    XA: "Multiple Countries (Asia)",
+    XE: "Multiple Countries (Europe)",
+    XN: "Multiple Countries (North America)",
+    XO: "Multiple Countries (Oceania)",
+    XS: "Multiple Countries (South America)",
+    XW: "Multiple Countries (World)",
+}
+
+const localizedFlags = {
+    TW: "./images/ChineseTaipeiSquared.png",
+}
+
+const noFlagBorders = {
+    NP: false,
+    TW: false,
+}
+
+function getCountryFlag(code) {
+    if (localizedFlags[code.toUpperCase()] == undefined) {
+        return `https://flagcdn.com/h240/${code}.png`
+    }
+    return localizedFlags[code.toUpperCase()]
+}
+
+let regionNames = new Intl.DisplayNames(['en'], {type: 'region'});
+function getCountryName(code) {
+    if (localizedNames[code] == undefined) {
+        return regionNames.of(code.toUpperCase())
+    }
+    return localizedNames[code.toUpperCase()]
+}

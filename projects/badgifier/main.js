@@ -149,7 +149,7 @@ function LoadCountryFlags() {
         var code = wcif.persons[person].countryIso2.toLowerCase();
         if (flags[code] == undefined) {
             flags[code] = true;
-            var flagElement = $(`<img style="display: none;" id='${code}-flag' src='https://flagcdn.com/h80/${code}.png'/>`)
+            var flagElement = $(`<img style="display: none;" id='${code}-flag' src='${getCountryFlag(code)}'/>`)
             $("#hidden-images").append(flagElement);
             console.log(`Added flag: ${code}`)
         }

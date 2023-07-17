@@ -488,7 +488,7 @@ function DrawSchedule(doc, x, y, w, info) {
                 for (var k=0; k<assignment.running.length; k++) {
                     if (k == 0) {
                         roleText += shortRoles ? " R:" : " Run:";
-                        roleText += ` R: ${assignment.running[k]}`
+                        roleText += ` ${assignment.running[k]}`
                     } else {
                         roleText += `, ${assignment.running[k]}`
                     }
@@ -698,9 +698,11 @@ function AddPortraitNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
         doc.addImage($("#badge-img")[0], "PNG", 0, 0, A7P_WIDTH, A7P_WIDTH * backgroundRatio, "background", "SLOW");
 
         // Place name, starting from bottom and adding extra lines on top for longer names
-        var textLines = SplitNameOntoTwoLines(doc, info.name, 10);
-        DrawName(doc, textLines[0], "center", 3, 71, A7P_WIDTH - 6, 10)
-        DrawName(doc, textLines[1], "center", 3, 80, A7P_WIDTH - 6, 10)
+        if (!info.blank) {
+            var textLines = SplitNameOntoTwoLines(doc, info.name, 10);
+            DrawName(doc, textLines[0], "center", 3, 71, A7P_WIDTH - 6, 10)
+            DrawName(doc, textLines[1], "center", 3, 80, A7P_WIDTH - 6, 10)
+        }
 
         doc.setLineWidth(0.25);
         doc.setDrawColor(0,0,0);

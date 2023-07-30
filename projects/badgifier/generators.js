@@ -3,6 +3,10 @@ const A4L_WIDTH = 297
 const A4L_HEIGHT = 210
 const A4P_WIDTH = 210
 const A4P_HEIGHT = 297
+const A5L_WIDTH = 210
+const A5L_HEIGHT = 148.5
+const A5P_WIDTH = 148.5
+const A5P_HEIGHT = 210
 const A6L_WIDTH = 148.5
 const A6L_HEIGHT = 105
 const A6P_WIDTH = 105
@@ -390,7 +394,7 @@ function GetRowColor(row, event, group, station, room) {
 
 // Draw the individual schedule
 // Returns the final height of the schedule
-function DrawSchedule(doc, x, y, w, info) {
+function DrawSchedule(doc, x, y, w, info, hscale=1.0) {
 
     // Place schedule
     const TIME_RATIO = 0.21;
@@ -425,7 +429,7 @@ function DrawSchedule(doc, x, y, w, info) {
     var row = y;
     var column = x;
 
-    var height = 2.5;
+    var height = 2.5 * hscale;
 
     if (!info.blank) {
         // Header
@@ -455,7 +459,7 @@ function DrawSchedule(doc, x, y, w, info) {
         // For each daily schedule
         for (var i=0; i<info.sortedSchedule.length; i++) {   
             // Add day header
-            height = 4;
+            height = 4 * hscale;
             DrawTextBox(doc, weekDaysMap[info.sortedSchedule[i].day], "center", column, row, w, height);
             row += height;
 
@@ -529,7 +533,7 @@ function DrawSchedule(doc, x, y, w, info) {
                 }
                 alternatingColors++
                 
-                var height = 3.5;
+                var height = 3.5 * hscale;
                 if (settings.includeTimes) {
                     DrawTextBox(doc, assignment.timeText, "left",  column, row, timeWidth, height, fillColor);
                     column += timeWidth;
@@ -677,7 +681,7 @@ function AddLandscapeNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
 }
 
 
-// Draws an entire A6 landscape name badge
+// Draws an entire A6 portrait name badge
 function AddPortraitNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
     
     var info = GeneratePersonInformation(index);
@@ -761,7 +765,7 @@ function AddPortraitNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
         DrawName(doc, info.name, "left", 3, 7, A7P_WIDTH - 12, 4)
         
         // Place registration id
-        doc.setFont("NotoSans-Regular")
+        doc.setFont("NotoSans-Regular") 
         doc.setFontSize(7);
         doc.text(`${info.compid}`, A7P_WIDTH - 6, 6, {
             align:"center",
@@ -786,8 +790,123 @@ function AddPortraitNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
         }
 
         doc.setLineWidth(0.25);
-        doc.setDrawColor(128, 128, 128);
+        doc.setDrawColor(128, 128, 128); 
         doc.line(A6L_WIDTH / 2, 0, A6L_WIDTH / 2, A6L_HEIGHT);
+
+        doc.restoreGraphicsState();
+    }
+}
+
+
+// Draws an entire A5 portrait name badge for championships
+function AddChampionshipPortraitNameBadge(doc, index) {
+    
+    var info = GeneratePersonInformation(index);
+
+    // ============
+    // Create badge
+    // ============
+    
+    // Front name side
+    {
+        doc.saveGraphicsState();
+
+        // Translate so we are in a landscape A7 space to layout name side
+        doc.setCurrentTransformationMatrix(new doc.Matrix(1, 0, 0, 1, MMtoPDF(A6P_WIDTH), 0))
+        
+        // Add background
+        var backgroundRatio = $("#badge-img").height() / $("#badge-img").width();
+        doc.addImage($("#badge-img")[0], "PNG", 0, 0, A6P_WIDTH, A6P_WIDTH * backgroundRatio, "background", "SLOW");
+
+        // Place name, starting from bottom and adding extra lines on top for longer names
+        if (!info.blank) {
+            var textLines = SplitNameOntoTwoLines(doc, info.name, 15);
+            DrawName(doc, textLines[0], "center", 5, 103, A6P_WIDTH - 10, 13)
+            DrawName(doc, textLines[1], "center", 5, 113, A6P_WIDTH - 10, 13)
+        }
+
+        doc.setLineWidth(0.4);
+        doc.setDrawColor(0,0,0);
+        doc.line(8, 115, A6P_WIDTH - 8, 115);
+
+        // Place WCA ID
+        doc.setFont("NotoSans-Regular")
+        doc.setFontSize(18);
+        
+        if (!info.blank) {
+            var nameText = info.wcaid;
+            if (info.wcaid == null) {
+                doc.setTextColor(196,0,0);
+                nameText = "NEWCOMER"
+            }
+            if (settings.includeCompetitorId) {
+                nameText += ` - ID ${info.compid}` 
+            }
+            
+            doc.text(nameText,  A6P_WIDTH/2, 122, {
+                align:"center",
+            });
+        }
+        doc.setTextColor(0,0,0);
+
+        // Add logos
+        var wcaRatio = $("#wca-img").width() / $("#wca-img").height();
+        doc.addImage($("#wca-img")[0], "PNG", 5, A6P_HEIGHT - 18, 13 * wcaRatio, 13, "wca", "SLOW");
+
+        var orgRatio = $("#org-img").width() / $("#org-img").height();
+        doc.addImage($("#org-img")[0], "PNG", A6P_WIDTH - (13 * orgRatio) - 5, A6P_HEIGHT - 18, 13 * orgRatio, 13, "org", "SLOW");
+
+        // Add country flag
+        if (!info.blank) {
+            var flagRatio = $(`#${info.countryCode}-flag`).width() / $(`#${info.countryCode}-flag`).height();
+            var flagWidth = flagRatio * 9;
+            doc.addImage($(`#${info.countryCode}-flag`)[0], "PNG", (A6P_WIDTH - flagWidth) / 2, A6P_HEIGHT - 23, flagWidth, 9, `${info.countryCode}-flag`, "SLOW");
+
+            if (noFlagBorders[info.countryCode.toUpperCase()] == undefined) {
+                doc.setLineWidth(0.2);
+                doc.setDrawColor(0,0,0);
+                doc.rect((A6P_WIDTH - flagWidth) / 2, A6P_HEIGHT - 23, flagWidth, 9);
+            }
+        }
+
+        doc.restoreGraphicsState();
+    }
+
+    // Schedule side
+    {
+        doc.saveGraphicsState();
+        
+        // Place name
+        DrawName(doc, info.name, "left", 6, 10, A6P_WIDTH - 20, 6)
+        
+        // Place registration id
+        doc.setFont("NotoSans-Regular") 
+        doc.setFontSize(7);
+        doc.text(`${info.compid}`, A6P_WIDTH - 9, 8, {
+            align:"center",
+        });
+
+        // Place schedule
+        var height = DrawSchedule(doc, 7, 15, A6P_WIDTH - 14, info, 1.2);
+
+        // WCA Live QR code is assumed to be square
+        // We don't draw it if the schedule extended down too far
+        if (settings.showWcaLiveQrCode && (height+10) < A6P_HEIGHT - 30) {
+            doc.addImage($("#wca-live-qrcode-img")[0], "PNG", A6P_WIDTH - 25, A6P_HEIGHT - 25, 20, 20, "wca-live-qrcode", "SLOW");
+            doc.setFontSize(11);
+            doc.setFont("NotoSans-Regular")
+            var wcaLiveLines = doc.splitTextToSize("Live results and full schedule available on WCA Live -", A6P_WIDTH - 40);
+            wcaLiveLines.push("Good luck and have fun!")
+            for (var i=0; i<wcaLiveLines.length; i++) {
+                doc.text(wcaLiveLines[i], A6P_WIDTH - 28, A6P_HEIGHT - 19 + (i*6), {
+                    align:"right",
+                });
+            }    
+        }
+
+        doc.setLineWidth(0.25);
+        doc.setDrawColor(128, 128, 128); 
+        doc.line(A5L_WIDTH / 2, 0, A5L_WIDTH / 2, A5L_HEIGHT);
 
         doc.restoreGraphicsState();
     }
@@ -873,7 +992,7 @@ function AddCertificate(doc, eventIndex, place, dateText, tintedImage) {
 }
 
 var persons;
-function MakeDocument() {
+function MakeDocument(preview=false) {
 
     if (wcif == undefined) {
         SetStatus("Cannot generate document: WCIF not provided yet", STATUS_MODE_ERROR);
@@ -892,23 +1011,32 @@ function MakeDocument() {
 
     var template = templates[settings.template];
 
-    persons.sort((a,b) => {
-        if (template.newcomersFirst) {
-            if (a.wcaId == null && b.wcaId != null) {
-                return -1
+    if (preview) {
+        // If preview, pick the person with the most assignments, which will likely be the most interesting
+        persons.sort((a,b) => {
+            return b.assignments.length - a.assignments.length;
+        })
+        persons = [persons[0]];
+    } else {
+        // Normally we sort by name/newcomer status
+        persons.sort((a,b) => {
+            if (template.newcomersFirst) {
+                if (a.wcaId == null && b.wcaId != null) {
+                    return -1
+                }
+                if (a.wcaId != null && b.wcaId == null) {
+                    return 1
+                }
             }
-            if (a.wcaId != null && b.wcaId == null) {
-                return 1
+            if (a.name > b.name) {
+                return -1;
             }
-        }
-        if (a.name < b.name) {
-            return -1;
-        }
-        if (a.name > b.name) {
-            return 1;
-        }
-        return 0;
-    });
+            if (a.name < b.name) {
+                return 1;
+            }
+            return 0;
+        });
+    }
 
     template.generationFunction();
 
@@ -1015,6 +1143,35 @@ function MakeA6PortraitBadges() {
         
         // Add badge
         AddPortraitNameBadge(globalDoc, index, false, 0, 0);
+
+        index+=1;
+    }
+
+    return true;
+}
+
+function MakeChampionshipPortraitBadges() {
+    // Name badges
+    globalDoc = new jspdf.jsPDF({
+        orientation: 'l',
+        unit:'mm',
+        format:'a5',
+    });
+
+    // Keep track of pages and badges
+    var index = 0;
+    while (true) {
+        if (index >= (persons.length + 1)) {
+            break;
+        }
+
+        // Create a new page
+        if (index != 0) {
+            globalDoc.addPage("a5", "l");
+        }
+        
+        // Add badge
+        AddChampionshipPortraitNameBadge(globalDoc, index, false, 0, 0);
 
         index+=1;
     }

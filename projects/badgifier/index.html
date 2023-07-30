@@ -232,6 +232,7 @@ title: Badgifier
                     <p>
                         'Generate' and preview the document. Adjust settings as needed and 'Generate' again. 'Download' to save the PDF document.
                     </p>
+                    <button class="btn btn-secondary" id="preview-button" onclick="PreviewDocument()">Quick Preview</button>
                     <button class="btn btn-primary" onclick="GenerateDocument()">Generate</button>
                     <button class="btn btn-secondary" id="print-button" onclick="PrintDocument()" disabled>Download</button>
                     <p id="status" class="info"></p>
@@ -242,7 +243,7 @@ title: Badgifier
                 </div>
             </div>
 
-            <p>Version 2.7.2</p>
+            <p>Version 2.8.0</p>
 
             <div id="hidden-images">
                 <img style="display: none;" id="org-img" src="./images/sca.png"/>

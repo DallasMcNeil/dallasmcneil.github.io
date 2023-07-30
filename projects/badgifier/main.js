@@ -37,6 +37,15 @@ var templates = [
         imageDescription: "Background images should be portrait A7 size (74.25mm x 105mm) or 877px x 1241px is recommended. The top 64mm (756px) is available for your competitions logo. The bottom 41mm (485px) is reserved for badge content and this part of your image should be very simple or blank. PNG or JPEG image formats are recommended.",
     },
     {
+        name: "Championship Portrait Book",
+        description: "Individual portrait badges and schedule for printing on A5 pages, meant for championship events",
+        generationFunction: MakeChampionshipPortraitBadges,
+        isCertificate: false,
+        newcomersFirst: true,
+        placeholderImage: "images/a7p-placeholder.png",
+        imageDescription: "Background images should be portrait A6 size (105mm x 148.5mm) or 1241px x 1754px is recommended. The top 64mm (756px) is available for your competitions logo. The bottom 41mm (485px) is reserved for badge content and this part of your image should be very simple or blank. PNG or JPEG image formats are recommended.",
+    },
+    {
         name: "Participation Certificates",
         description: "Certificate for each competitor for individual A4 pages",
         generationFunction: MakeParticipationCertificates,
@@ -276,6 +285,31 @@ function UseCustomColorChanged() {
     } else {
         $("#customColors").hide();
     }
+}
+
+function PreviewDocument() {
+    SetStatus("Generating PDF...", STATUS_MODE_INFO);
+    settings.customScheduleColorsCode = $("#customColorsCode").val();
+    setTimeout(() => {
+        try {
+            var error = !MakeDocument(true);
+            if (!error) {
+                // Don't allow document to be printed
+                $("#print-button").prop("disabled", true);
+
+                var blob = globalDoc.output('blob')
+                var blob_url = URL.createObjectURL(blob);
+                $("#document-preview").attr("src", blob_url)
+                $("#document-preview").show();
+                
+                SetStatus("PDF ready!", STATUS_MODE_INFO);
+            }
+        } catch (e) {
+            console.error(e)
+            $("#print-button").prop("disabled", true);
+            SetStatus("PDF failed to generate", STATUS_MODE_ERROR);
+        }
+    }, 100);
 }
 
 function GenerateDocument() {

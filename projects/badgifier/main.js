@@ -43,7 +43,7 @@ var templates = [
         isCertificate: false,
         newcomersFirst: true,
         placeholderImage: "images/a7p-placeholder.png",
-        imageDescription: "Background images should be portrait A6 size (105mm x 148.5mm) or 1241px x 1754px is recommended. The top 64mm (756px) is available for your competitions logo. The bottom 41mm (485px) is reserved for badge content and this part of your image should be very simple or blank. PNG or JPEG image formats are recommended.",
+        imageDescription: "Background images should be portrait A6 size (105mm x 148.5mm) or 1241px x 1754px is recommended. The top 90mm (1070px) is available for your competitions logo. The bottom 58.5mm (684px) is reserved for badge content and this part of your image should be very simple or blank. PNG or JPEG image formats are recommended.",
     },
     {
         name: "Participation Certificates",

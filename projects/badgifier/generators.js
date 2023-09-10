@@ -1,4 +1,6 @@
 
+// Paper sizes (in mm)
+// Standard A series paper sizes
 const A4L_WIDTH = 297
 const A4L_HEIGHT = 210
 const A4P_WIDTH = 210
@@ -16,17 +18,15 @@ const A7L_HEIGHT = 74.25
 const A7P_WIDTH = 74.25
 const A7P_HEIGHT = 105
 
-//8.5x11 Paper for American Letter Size
-const LETTER_L_HEIGHT = 215.9
-const LETTER_L_WIDTH = 279.4 
+//8.5x11 inch paper for American Letter Size
+const LETTERL_WIDTH = 279.4 
+const LETTERL_HEIGHT = 215.9
 
-//4x6 Paper for American Memo Size
-const FOURBYSIX_HEIGHT = 101.6;
-const FOURBYSIX_WIDTH = 152.4;
+//4x6 inch paper for American Memo Size
+const FOURBYSIXL_WIDTH = 152.4
+const FOURBYSIXL_HEIGHT = 101.6
 
-
-
-
+// Convert mm to PDF units (72ths of an inch)
 function MMtoPDF(mm) { return (mm*72.0/25.4)}
 
 // Convert a hexadecimal number to rgb components
@@ -42,19 +42,30 @@ function HexToRgb(hex) {
 // Get all the information we need to display for a person
 // This includes building a schedule to display
 function GeneratePersonInformation(index) {
+    // Information we want to gather
     var isBlank = index >= persons.length;
     var name = "";
     var wcaid = null;
     var compid = "-";
     var countryCode = "";
+    var role = "";
     var personalSchedule = {}
     var sortedSchedule = []
 
     if (!isBlank) {
+        // Get information from wcif
         name = persons[index].name;
         wcaid = persons[index].wcaId;
         compid = persons[index].registrantId;
         countryCode = persons[index].countryIso2.toLowerCase();
+
+        if (persons[index].roles.find((r) => {return r == "delegate"})) {
+            role = "delegate"
+        } else if (persons[index].roles.find((r) => {return r == "trainee-delegate"})) {
+            role = "trainee-delegate"
+        } else if (persons[index].roles.find((r) => {return r == "organizer"})) {
+            role = "organizer"
+        }
 
         // If a schedule table exists, create a personal schedule for each day
         // This object holds all assignment information per event, combining staffing and competing 
@@ -161,6 +172,7 @@ function GeneratePersonInformation(index) {
         countryCode: countryCode,
         personalSchedule: personalSchedule,
         sortedSchedule: sortedSchedule,
+        role: role,
     }
 }
 
@@ -180,7 +192,7 @@ function DrawName(doc, text, align, x, y, w, h, latinFont="NotoSans-Bold") {
         var localFont = DetermineFont(localName)
         console.log(`Local name ${localName} with font ${localFont}`)
 
-        // Find lengths of all text componenets
+        // Find lengths of all text components
         doc.setFont(latinFont)
         doc.setFontSize(fontSize);
 
@@ -377,6 +389,7 @@ function DrawTextBox(doc, text, align, x, y, w, h, fillColor=[255,255,255], icon
 }
 
 // Draw some text with alignment and a maximum width allowed
+// x,y,w,h specifies box
 function DrawText(doc, text, align, x, y, w, h) {
     // Just latin text to be drawn
     var fontSize = h * 2.2;
@@ -396,11 +409,43 @@ function DrawText(doc, text, align, x, y, w, h) {
     }
 }
 
-
+// Use the user supplied program to get a color based on a rows details
 function GetRowColor(row, event, group, station, room) {
     let color = "#FFFFFF";
     eval(settings.customScheduleColorsCode);
     return color;
+}
+
+// Take an image element and tint it based on color
+// Returns new element
+function CreateTintedImage(img, color) {
+    var w = img.width;
+    var h = img.height;
+
+    var canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage( img, 0, 0 );
+    var pixels = ctx.getImageData( 0, 0, w, h ).data;
+
+    var to = ctx.getImageData( 0, 0, w, h );
+    var toData = to.data;
+
+    for (var i = 0, len = pixels.length; i < len; i += 4) {
+        toData[i  ] = pixels[i  ] * (color[0] / 255.0);
+        toData[i+1] = pixels[i+1] * (color[1] / 255.0);
+        toData[i+2] = pixels[i+2] * (color[2] / 255.0);
+        toData[i+3] = pixels[i+3];
+    }
+    
+    ctx.putImageData(to, 0, 0 );
+    
+    var imgComp = new Image();
+    imgComp.src = canvas.toDataURL();
+        
+    return imgComp;
 }
 
 // Draw the individual schedule
@@ -574,251 +619,13 @@ function DrawSchedule(doc, x, y, w, info, hscale=1.0) {
     return row - y;
 }
 
-// Draws an entire A6 landscape name badge
-function AddLandscapeNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
-
-    var info = GeneratePersonInformation(index);
-
-    // ============
-    // Create badge
-    // ============
-    
-    // Front name side
-    {
-        doc.saveGraphicsState();
-
-        // Translate so we are in a landscape A7 space to layout name side
-        if (isA4) {
-            doc.setCurrentTransformationMatrix(new doc.Matrix(1, 0, 0, 1, MMtoPDF(tx), MMtoPDF(ty)));
-            doc.setCurrentTransformationMatrix(new doc.Matrix(0, -1, 1, 0, 0, 0));
-            doc.setCurrentTransformationMatrix(new doc.Matrix(1, 0, 0, 1, MMtoPDF(-A7L_WIDTH*2), MMtoPDF(-61.5)));
-        } else {
-            doc.setCurrentTransformationMatrix(new doc.Matrix(0,-1, 1, 0, 121.3, A6L_WIDTH*2));
-        }
-        
-        // Add background
-        var backgroundRatio = $("#badge-img").height() / $("#badge-img").width();
-        doc.addImage($("#badge-img")[0], "PNG", 0, 0, A7L_WIDTH, A7L_WIDTH * backgroundRatio, "background", "SLOW");
-
-        // Place name, starting from bottom and adding extra lines on top for longer names
-        DrawName(doc, info.name, "center", 5, 57, A7L_WIDTH - 10, 10)
-
-        doc.setLineWidth(0.25);
-        doc.setDrawColor(0,0,0);
-        doc.line(20, 59, A7L_WIDTH - 20, 59);
-
-        // Place WCA ID
-        doc.setFont("NotoSans-Regular")
-        doc.setFontSize(13);
-
-        if (!info.blank) {
-            var nameText = info.wcaid;
-            if (info.wcaid == null) {
-                doc.setTextColor(196,0,0);
-                nameText = "NEWCOMER"
-            }
-            if (settings.includeCompetitorId) {
-                nameText += ` - ID ${info.compid}` 
-            }
-            
-            doc.text(nameText, A7L_WIDTH/2, 64, {
-                align:"center",
-            });
-        }
-        doc.setTextColor(0,0,0);
-
-        // Add logos
-        var wcaRatio = $("#wca-img").width() / $("#wca-img").height();
-        doc.addImage($("#wca-img")[0], "PNG", 3, A7L_HEIGHT - 13, 10 * wcaRatio, 10, "wca", "SLOW");
-
-        var orgRatio = $("#org-img").width() / $("#org-img").height();
-        doc.addImage($("#org-img")[0], "PNG", A7L_WIDTH - (10 * orgRatio) - 3, A7L_HEIGHT - 13, 10 * orgRatio, 10, "org", "SLOW");
-
-        // Add country flag
-        if (!info.blank) {
-            var flagRatio = $(`#${info.countryCode}-flag`).width() / $(`#${info.countryCode}-flag`).height();
-            var flagWidth = flagRatio * 5;
-            doc.addImage($(`#${info.countryCode}-flag`)[0], "PNG", (A7L_WIDTH - flagWidth) / 2, A7L_HEIGHT - 8, flagWidth, 5, `${info.countryCode}-flag`, "SLOW");
-
-            if (noFlagBorders[info.countryCode.toUpperCase()] == undefined) {
-                doc.setLineWidth(0.1);
-                doc.setDrawColor(0,0,0);
-                doc.rect((A7L_WIDTH - flagWidth) / 2, A7L_HEIGHT - 8, flagWidth, 5);
-            }
-        }
-
-        doc.restoreGraphicsState();
-    }
-
-    // Schedule side
-    {
-        doc.saveGraphicsState();
-        
-        doc.setCurrentTransformationMatrix(new doc.Matrix(1, 0, 0, 1, MMtoPDF(tx), MMtoPDF(ty)));
-
-        // Place name
-        DrawName(doc, info.name, "left", 3, 7, A7P_WIDTH - 12, 4)
-
-        // Place registration id
-        doc.setFont("NotoSans-Regular")
-        doc.setFontSize(7);
-        doc.text(`${info.compid}`, A7P_WIDTH - 6, 6, {
-            align:"center",
-        });
-
-        var height = DrawSchedule(doc, 3, 10, 68, info);
-
-        // WCA Live QR code is assumed to be square
-        // We don't draw it if the schedule extended down too far
-        if (settings.showWcaLiveQrCode && (height+10) < A7P_HEIGHT - 20) {
-            doc.addImage($("#wca-live-qrcode-img")[0], "PNG", A7P_WIDTH - 18, A7P_HEIGHT - 18, 15, 15, "wca-live-qrcode", "SLOW");
-            doc.setFontSize(8);
-            doc.setFont("NotoSans-Regular")
-            var wcaLiveLines = doc.splitTextToSize("Live results and full schedule available on WCA Live -", A7P_WIDTH - 30);
-            wcaLiveLines.push("Good luck and have fun!")
-            for (var i=0; i<wcaLiveLines.length; i++) {
-                doc.text(wcaLiveLines[i], A7P_WIDTH - 20, A7P_HEIGHT - 13.5 + (i*4), {
-                    align:"right",
-                });
-            }    
-        }
-
-        doc.setLineWidth(0.25);
-        doc.setDrawColor(128, 128, 128);
-        doc.line(A6L_WIDTH / 2, 0, A6L_WIDTH / 2, A6L_HEIGHT);
-
-        doc.restoreGraphicsState();
-    }
-}
-
-
-// Draws an entire A6 portrait name badge
-function AddPortraitNameBadge(doc, index, isA4 = false, tx = 0, ty = 0) {
-    
-    var info = GeneratePersonInformation(index);
-
-    // ============
-    // Create badge
-    // ============
-    
-    // Front name side
-    {
-        doc.saveGraphicsState();
-
-        // Translate so we are in a landscape A7 space to layout name side
-        doc.setCurrentTransformationMatrix(new doc.Matrix(1, 0, 0, 1, MMtoPDF(tx + A7P_WIDTH), MMtoPDF(ty)))
-        
-        // Add background
-        var backgroundRatio = $("#badge-img").height() / $("#badge-img").width();
-        doc.addImage($("#badge-img")[0], "PNG", 0, 0, A7P_WIDTH, A7P_WIDTH * backgroundRatio, "background", "SLOW");
-
-        // Place name, starting from bottom and adding extra lines on top for longer names
-        if (!info.blank) {
-            var textLines = SplitNameOntoTwoLines(doc, info.name, 10);
-            DrawName(doc, textLines[0], "center", 3, 71, A7P_WIDTH - 6, 10)
-            DrawName(doc, textLines[1], "center", 3, 80, A7P_WIDTH - 6, 10)
-        }
-
-        doc.setLineWidth(0.25);
-        doc.setDrawColor(0,0,0);
-        doc.line(5, 83, A7P_WIDTH - 5, 83);
-
-        // Place WCA ID
-        doc.setFont("NotoSans-Regular")
-        doc.setFontSize(13);
-        
-        if (!info.blank) {
-            var nameText = info.wcaid;
-            if (info.wcaid == null) {
-                doc.setTextColor(196,0,0);
-                nameText = "NEWCOMER"
-            }
-            if (settings.includeCompetitorId) {
-                nameText += ` - ID ${info.compid}` 
-            }
-            
-            doc.text(nameText,  A7P_WIDTH/2, 88, {
-                align:"center",
-            });
-        }
-        doc.setTextColor(0,0,0);
-
-        // Add logos
-        var wcaRatio = $("#wca-img").width() / $("#wca-img").height();
-        doc.addImage($("#wca-img")[0], "PNG", 3, A7P_HEIGHT - 13, 10 * wcaRatio, 10, "wca", "SLOW");
-
-        var orgRatio = $("#org-img").width() / $("#org-img").height();
-        doc.addImage($("#org-img")[0], "PNG", A7P_WIDTH - (10 * orgRatio) - 3, A7P_HEIGHT - 13, 10 * orgRatio, 10, "org", "SLOW");
-
-        // Add country flag
-        if (!info.blank) {
-            var flagRatio = $(`#${info.countryCode}-flag`).width() / $(`#${info.countryCode}-flag`).height();
-            var flagWidth = flagRatio * 5;
-            doc.addImage($(`#${info.countryCode}-flag`)[0], "PNG", (A7P_WIDTH - flagWidth) / 2, A7P_HEIGHT - 15, flagWidth, 5, `${info.countryCode}-flag`, "SLOW");
-
-            if (noFlagBorders[info.countryCode.toUpperCase()] == undefined) {
-                doc.setLineWidth(0.1);
-                doc.setDrawColor(0,0,0);
-                doc.rect((A7P_WIDTH - flagWidth) / 2, A7P_HEIGHT - 15, flagWidth, 5);
-            }
-        }
-
-        doc.restoreGraphicsState();
-    }
-
-    // Schedule side
-    {
-        doc.saveGraphicsState();
-        
-        doc.setCurrentTransformationMatrix(new doc.Matrix(1, 0, 0, 1, MMtoPDF(tx), MMtoPDF(ty)));
-
-        // Place name
-        DrawName(doc, info.name, "left", 3, 7, A7P_WIDTH - 12, 4)
-        
-        // Place registration id
-        doc.setFont("NotoSans-Regular") 
-        doc.setFontSize(7);
-        doc.text(`${info.compid}`, A7P_WIDTH - 6, 6, {
-            align:"center",
-        });
-
-        // Place schedule
-        var height = DrawSchedule(doc, 3, 10, 68, info);
-
-        // WCA Live QR code is assumed to be square
-        // We don't draw it if the schedule extended down too far
-        if (settings.showWcaLiveQrCode && (height+10) < A7P_HEIGHT - 20) {
-            doc.addImage($("#wca-live-qrcode-img")[0], "PNG", A7P_WIDTH - 18, A7P_HEIGHT - 18, 15, 15, "wca-live-qrcode", "SLOW");
-            doc.setFontSize(8);
-            doc.setFont("NotoSans-Regular")
-            var wcaLiveLines = doc.splitTextToSize("Live results and full schedule available on WCA Live -", A7P_WIDTH - 30);
-            wcaLiveLines.push("Good luck and have fun!")
-            for (var i=0; i<wcaLiveLines.length; i++) {
-                doc.text(wcaLiveLines[i], A7P_WIDTH - 20, A7P_HEIGHT - 13.5 + (i*4), {
-                    align:"right",
-                });
-            }    
-        }
-
-        doc.setLineWidth(0.25);
-        doc.setDrawColor(128, 128, 128); 
-        doc.line(A6L_WIDTH / 2, 0, A6L_WIDTH / 2, A6L_HEIGHT);
-
-        doc.restoreGraphicsState();
-    }
-}
-
-
-// Americans and non standard paper... need to make this so it takes the measurements as params rather than copying the function each time
-function AddPortraitNameBadgeWithDimensions(doc, index, tx = 0, ty = 0, badgeHeight, badgeWidth) {
+// Draw an entire standard portrait badge (name and schedule side) with page dimensions
+// tx and ty are offset on page to draw at
+function AddPortraitNameBadgeWithDimensions(doc, index, badgeWidth, badgeHeight, tx = 0, ty = 0) {
     var info = GeneratePersonInformation(index);
 
     var halfWidth = badgeWidth / 2;
 
-    // ============
-    // Create badge
-    // ============
-    
     // Front name side
     {
         doc.saveGraphicsState();
@@ -830,8 +637,7 @@ function AddPortraitNameBadgeWithDimensions(doc, index, tx = 0, ty = 0, badgeHei
         var backgroundRatio = $("#badge-img").height() / $("#badge-img").width();
         doc.addImage($("#badge-img")[0], "PNG", 0, 0, halfWidth, halfWidth * backgroundRatio, "background", "SLOW");
 
-        //Bottom part of the card starts at %60
-        var nameStart = (badgeHeight * .6) + 7;
+        var nameStart = badgeHeight - 33;
         // Place name, starting from bottom and adding extra lines on top for longer names
         if (!info.blank) {
             var textLines = SplitNameOntoTwoLines(doc, info.name, 10);
@@ -849,8 +655,14 @@ function AddPortraitNameBadgeWithDimensions(doc, index, tx = 0, ty = 0, badgeHei
         
         if (!info.blank) {
             var nameText = info.wcaid;
-            if (info.wcaid == null) {
+            if (info.role == "delegate" || info.role == "trainee-delegate") {
                 doc.setTextColor(196,0,0);
+                nameText = "DELEGATE"
+            } else if (info.role == "organizer") {
+                doc.setTextColor(0,196,0);
+                nameText = "ORGANIZER"
+            } else if (info.wcaid == null) {
+                doc.setTextColor(0,0,196);
                 nameText = "NEWCOMER"
             }
             if (settings.includeCompetitorId) {
@@ -868,19 +680,18 @@ function AddPortraitNameBadgeWithDimensions(doc, index, tx = 0, ty = 0, badgeHei
         doc.addImage($("#wca-img")[0], "PNG", 3, badgeHeight - 13, 10 * wcaRatio, 10, "wca", "SLOW");
 
         var orgRatio = $("#org-img").width() / $("#org-img").height();
-        //doc.addImage($("#org-img")[0], "PNG", FOURBYSIX_FOURTH_WIDTH - (10 * orgRatio) - 3, FOURBYSIX_HALF_HEIGHT - 13, 10 * orgRatio, 10, "org", "SLOW");
         doc.addImage($("#org-img")[0], "PNG", halfWidth - (10 * orgRatio) - 3, badgeHeight - 13, 10 * orgRatio, 10, "org", "SLOW");
 
         // Add country flag
         if (!info.blank) {
             var flagRatio = $(`#${info.countryCode}-flag`).width() / $(`#${info.countryCode}-flag`).height();
             var flagWidth = flagRatio * 5;
-            doc.addImage($(`#${info.countryCode}-flag`)[0], "PNG", (halfWidth - flagWidth) / 2, badgeHeight - 15, flagWidth, 5, `${info.countryCode}-flag`, "SLOW");
+            doc.addImage($(`#${info.countryCode}-flag`)[0], "PNG", (halfWidth - flagWidth) / 2, badgeHeight - 14, flagWidth, 5, `${info.countryCode}-flag`, "SLOW");
 
             if (noFlagBorders[info.countryCode.toUpperCase()] == undefined) {
                 doc.setLineWidth(0.1);
                 doc.setDrawColor(0,0,0);
-                doc.rect((halfWidth - flagWidth) / 2, badgeHeight - 15, flagWidth, 5);
+                doc.rect((halfWidth - flagWidth) / 2, badgeHeight - 14, flagWidth, 5);
             }
         }
 
@@ -930,27 +741,30 @@ function AddPortraitNameBadgeWithDimensions(doc, index, tx = 0, ty = 0, badgeHei
     
 }
 
-// Draws an entire A6 landscape name badge
-function AddLandscapeNameBadgeWithDimensions(doc, index, isLetter = false, tx = 0, ty = 0, badgeHeight, badgeWidth) {
+// Draw an entire standard portrait badge (name and schedule side) with page dimensions
+// tx and ty are offset on page to draw at
+// pageType is either "a4", "a6", "letter" or "4x6"
+function AddLandscapeNameBadgeWithDimensions(doc, index, badgeWidth, badgeHeight, pageType="", tx = 0, ty = 0) {
 
     var info = GeneratePersonInformation(index);
     var halfWidth = badgeWidth / 2;
-
-    // ============
-    // Create badge
-    // ============
     
     // Front name side
     {
         doc.saveGraphicsState();
 
-        // Translate so we are in a landscape A7 space to layout name side
-        if (isLetter) {
+        // Translate so we are in a landscape space to layout name side
+        if (pageType == "a4") {
             doc.setCurrentTransformationMatrix(new doc.Matrix(1, 0, 0, 1, MMtoPDF(tx), MMtoPDF(ty)));
             doc.setCurrentTransformationMatrix(new doc.Matrix(0, -1, 1, 0, 0, 0));
-            //doc.setCurrentTransformationMatrix(new doc.Matrix(1, 0, 0, 1, MMtoPDF(-halfWidth*2), MMtoPDF(-76.2)));
+            doc.setCurrentTransformationMatrix(new doc.Matrix(1, 0, 0, 1, MMtoPDF(-A7L_WIDTH*2), MMtoPDF(-61.5)));
+        } else if (pageType == "a6") {
+            doc.setCurrentTransformationMatrix(new doc.Matrix(0,-1, 1, 0, 121.3, A6L_WIDTH*2));
+        } else if (pageType == "letter") {
+            doc.setCurrentTransformationMatrix(new doc.Matrix(1, 0, 0, 1, MMtoPDF(tx), MMtoPDF(ty)));
+            doc.setCurrentTransformationMatrix(new doc.Matrix(0, -1, 1, 0, 0, 0));
             doc.setCurrentTransformationMatrix(new doc.Matrix(1, 0, 0, 1, MMtoPDF(-216), MMtoPDF(-76.2)));
-        } else {
+        } else if (pageType == "4x6") {
             doc.setCurrentTransformationMatrix(new doc.Matrix(0,-1, 1, 0, 143.7, 288));
         }
         
@@ -959,7 +773,7 @@ function AddLandscapeNameBadgeWithDimensions(doc, index, isLetter = false, tx = 
         doc.addImage($("#badge-img")[0], "PNG", 0, 0, badgeHeight, badgeHeight * backgroundRatio, "background", "SLOW");
 
         // Place name, starting from bottom and adding extra lines on top for longer names
-        var nameStart = (halfWidth * .6) + 7;
+        var nameStart = halfWidth - 17
         DrawName(doc, info.name, "center", 5, nameStart, badgeHeight - 10, 10)
 
         doc.setLineWidth(0.25);
@@ -972,8 +786,14 @@ function AddLandscapeNameBadgeWithDimensions(doc, index, isLetter = false, tx = 
 
         if (!info.blank) {
             var nameText = info.wcaid;
-            if (info.wcaid == null) {
+            if (info.role == "delegate" || info.role == "trainee-delegate") {
                 doc.setTextColor(196,0,0);
+                nameText = "DELEGATE"
+            } else if (info.role == "organizer") {
+                doc.setTextColor(0,160,0);
+                nameText = "ORGANIZER"
+            } else if (info.wcaid == null) {
+                doc.setTextColor(0,0,196);
                 nameText = "NEWCOMER"
             }
             if (settings.includeCompetitorId) {
@@ -1057,10 +877,6 @@ function AddChampionshipPortraitNameBadge(doc, index) {
     
     var info = GeneratePersonInformation(index);
 
-    // ============
-    // Create badge
-    // ============
-    
     // Front name side
     {
         doc.saveGraphicsState();
@@ -1166,7 +982,7 @@ function AddChampionshipPortraitNameBadge(doc, index) {
     }
 }
 
-// Draws an entire A6 landscape name badge
+// Draw a standard certificate for podium winners
 function AddCertificate(doc, eventIndex, place, dateText, tintedImage) {
 
     // Get event specific text
@@ -1192,10 +1008,7 @@ function AddCertificate(doc, eventIndex, place, dateText, tintedImage) {
     var pageColor = HexToRgb(settings.certPageColor)
     var textColor = HexToRgb(settings.certTextColor)
     
-    // ==================
-    // Create certificate
-    // ==================
-    
+    // Draw the certificate
     // Add page
     doc.setFillColor(pageColor[0], pageColor[1], pageColor[2]);
     doc.rect(0, 0, A4L_WIDTH, A4L_HEIGHT, "F");
@@ -1203,7 +1016,6 @@ function AddCertificate(doc, eventIndex, place, dateText, tintedImage) {
     // Add background
     var backgroundRatio = tintedImage.height / tintedImage.width;
     doc.addImage(tintedImage, "PNG", 0, 0, A4L_WIDTH, A4L_WIDTH * backgroundRatio, "background", "SLOW");
-
 
     var logoMargins = settings.certThinMargins ? [5.0, 5.0] : [22.0, 22.0]
     var logoHeight = 28.0
@@ -1245,6 +1057,7 @@ function AddCertificate(doc, eventIndex, place, dateText, tintedImage) {
     DrawText(doc, settings.certOrganiser, "center", A4L_WIDTH - logoMargins[0] - 65, A4L_HEIGHT - bottomHeight + 7, 70, 9);
 }
 
+// Make a preview or full document from user specified settings
 var persons;
 function MakeDocument(preview=false) {
 
@@ -1282,10 +1095,10 @@ function MakeDocument(preview=false) {
                     return 1
                 }
             }
-            if (a.name > b.name) {
+            if (a.name < b.name) {
                 return -1;
             }
-            if (a.name < b.name) {
+            if (a.name > b.name) {
                 return 1;
             }
             return 0;
@@ -1296,6 +1109,8 @@ function MakeDocument(preview=false) {
 
     return true;
 }
+
+// Function for each format to generate badges
 
 var globalDoc;
 function MakeA6LandscapeBadges() {
@@ -1319,7 +1134,7 @@ function MakeA6LandscapeBadges() {
         }
         
         // Add badge
-        AddLandscapeNameBadge(globalDoc, index, false, 0, 0);
+        AddLandscapeNameBadgeWithDimensions(globalDoc, index, A6L_WIDTH, A6L_HEIGHT, "a6");
 
         index+=1;
     }
@@ -1365,7 +1180,7 @@ function MakeA4LandscapeBadges() {
 
         // Add badge
         // Translate badge to different spot
-        AddLandscapeNameBadge(globalDoc, index, true, (index & 0x1) * A4L_WIDTH/2, (index & 0x2) * -A4L_HEIGHT/4);
+        AddLandscapeNameBadgeWithDimensions(globalDoc, index, A6L_WIDTH, A6L_HEIGHT, "a4", (index & 0x1) * A4L_WIDTH/2, (index & 0x2) * -A4L_HEIGHT/4);
 
         globalDoc.restoreGraphicsState();
 
@@ -1396,37 +1211,7 @@ function MakeA6PortraitBadges() {
         }
         
         // Add badge
-        AddPortraitNameBadge(globalDoc, index, false, 0, 0);
-
-        index+=1;
-    }
-
-    return true;
-}
-
-
-function MakeChampionshipPortraitBadges() {
-    // Name badges
-    globalDoc = new jspdf.jsPDF({
-        orientation: 'l',
-        unit:'mm',
-        format:'a5',
-    });
-
-    // Keep track of pages and badges
-    var index = 0;
-    while (true) {
-        if (index >= (persons.length + 1)) {
-            break;
-        }
-
-        // Create a new page
-        if (index != 0) {
-            globalDoc.addPage("a5", "l");
-        }
-        
-        // Add badge
-        AddChampionshipPortraitNameBadge(globalDoc, index, false, 0, 0);
+        AddPortraitNameBadgeWithDimensions(globalDoc, index, A6L_WIDTH, A6L_HEIGHT);
 
         index+=1;
     }
@@ -1472,7 +1257,7 @@ function MakeA4PortraitBadges() {
 
         // Add badge
         // Translate badge to different spot
-        AddPortraitNameBadge(globalDoc, index, true, (index & 0x1) * A4L_WIDTH/2, (index & 0x2) * -A4L_HEIGHT/4);
+        AddPortraitNameBadgeWithDimensions(globalDoc, index, A6L_WIDTH, A6L_HEIGHT, (index & 0x1) * A4L_WIDTH/2, (index & 0x2) * -A4L_HEIGHT/4);
 
         globalDoc.restoreGraphicsState();
 
@@ -1498,8 +1283,8 @@ function MakeLetterPortraitBadges() {
             globalDoc.setLineWidth(0.25);
             globalDoc.setLineDash([1]);
             globalDoc.setDrawColor(128, 128, 128);
-            globalDoc.line(LETTER_L_WIDTH / 2, 0, LETTER_L_WIDTH / 2, LETTER_L_HEIGHT);
-            globalDoc.line(0, LETTER_L_HEIGHT / 2, LETTER_L_WIDTH, LETTER_L_HEIGHT / 2);
+            globalDoc.line(LETTERL_WIDTH / 2, 0, LETTERL_WIDTH / 2, LETTERL_HEIGHT);
+            globalDoc.line(0, LETTERL_HEIGHT / 2, LETTERL_WIDTH, LETTERL_HEIGHT / 2);
             globalDoc.restoreGraphicsState();
             break;
         }
@@ -1510,8 +1295,8 @@ function MakeLetterPortraitBadges() {
             globalDoc.setLineWidth(0.25);
             globalDoc.setLineDash([1]);
             globalDoc.setDrawColor(128, 128, 128);
-            globalDoc.line(LETTER_L_WIDTH / 2, 0, LETTER_L_WIDTH / 2, LETTER_L_HEIGHT);
-            globalDoc.line(0, LETTER_L_HEIGHT / 2, LETTER_L_WIDTH, LETTER_L_HEIGHT / 2);
+            globalDoc.line(LETTERL_WIDTH / 2, 0, LETTERL_WIDTH / 2, LETTERL_HEIGHT);
+            globalDoc.line(0, LETTERL_HEIGHT / 2, LETTERL_WIDTH, LETTERL_HEIGHT / 2);
             globalDoc.restoreGraphicsState();
             globalDoc.addPage("letter", "l");
         }
@@ -1520,7 +1305,7 @@ function MakeLetterPortraitBadges() {
 
         // Add badge
         // Translate badge to different spot
-        AddPortraitNameBadgeWithDimensions(globalDoc, index, (index & 0x1) * LETTER_L_WIDTH/2, (index & 0x2) * - LETTER_L_HEIGHT/4, LETTER_L_HEIGHT/2, LETTER_L_WIDTH/2);
+        AddPortraitNameBadgeWithDimensions(globalDoc, index, LETTERL_WIDTH/2, LETTERL_HEIGHT/2, (index & 0x1) * LETTERL_WIDTH/2, (index & 0x2) * - LETTERL_HEIGHT/4);
 
         globalDoc.restoreGraphicsState();
 
@@ -1546,8 +1331,8 @@ function MakeLetterLandscapeBadges() {
             globalDoc.setLineWidth(0.25);
             globalDoc.setLineDash([1]);
             globalDoc.setDrawColor(128, 128, 128);
-            globalDoc.line(LETTER_L_WIDTH / 2, 0, LETTER_L_WIDTH / 2, LETTER_L_HEIGHT);
-            globalDoc.line(0, LETTER_L_HEIGHT / 2, LETTER_L_WIDTH, LETTER_L_HEIGHT / 2);
+            globalDoc.line(LETTERL_WIDTH / 2, 0, LETTERL_WIDTH / 2, LETTERL_HEIGHT);
+            globalDoc.line(0, LETTERL_HEIGHT / 2, LETTERL_WIDTH, LETTERL_HEIGHT / 2);
             globalDoc.restoreGraphicsState();
             break;
         }
@@ -1558,8 +1343,8 @@ function MakeLetterLandscapeBadges() {
             globalDoc.setLineWidth(0.25);
             globalDoc.setLineDash([1]);
             globalDoc.setDrawColor(128, 128, 128);
-            globalDoc.line(LETTER_L_WIDTH / 2, 0, LETTER_L_WIDTH / 2, LETTER_L_HEIGHT);
-            globalDoc.line(0, LETTER_L_HEIGHT / 2, LETTER_L_WIDTH, LETTER_L_HEIGHT / 2);
+            globalDoc.line(LETTERL_WIDTH / 2, 0, LETTERL_WIDTH / 2, LETTERL_HEIGHT);
+            globalDoc.line(0, LETTERL_HEIGHT / 2, LETTERL_WIDTH, LETTERL_HEIGHT / 2);
             globalDoc.restoreGraphicsState();
             globalDoc.addPage("letter", "l");
         }
@@ -1568,7 +1353,7 @@ function MakeLetterLandscapeBadges() {
 
         // Add badge
         // Translate badge to different spot
-        AddLandscapeNameBadgeWithDimensions(globalDoc, index, true, (index & 0x1) * LETTER_L_WIDTH/2, (index & 0x2) * - LETTER_L_HEIGHT/4, LETTER_L_HEIGHT/2, LETTER_L_WIDTH/2);
+        AddLandscapeNameBadgeWithDimensions(globalDoc, index, LETTERL_WIDTH/2, LETTERL_HEIGHT/2, "letter", (index & 0x1) * LETTERL_WIDTH/2, (index & 0x2) * - LETTERL_HEIGHT/4);
 
         globalDoc.restoreGraphicsState();
 
@@ -1600,7 +1385,7 @@ function MakeFourBySixPortraitBadges() {
         }
         
         // Add badge
-        AddPortraitNameBadgeWithDimensions(globalDoc, index, 0, 0, FOURBYSIX_HEIGHT, FOURBYSIX_WIDTH);
+        AddPortraitNameBadgeWithDimensions(globalDoc, index, FOURBYSIXL_WIDTH, FOURBYSIXL_HEIGHT, 0, 0);
 
         index+=1;
     }
@@ -1608,7 +1393,6 @@ function MakeFourBySixPortraitBadges() {
     return true;
 }
 
-var globalDoc;
 function MakeFourBySixLandscapeBadges() {
     // Name badges
     globalDoc = new jspdf.jsPDF({
@@ -1630,7 +1414,36 @@ function MakeFourBySixLandscapeBadges() {
         }
         
         // Add badge
-        AddLandscapeNameBadgeWithDimensions(globalDoc, index, false, 0, 0, FOURBYSIX_HEIGHT, FOURBYSIX_WIDTH);
+        AddLandscapeNameBadgeWithDimensions(globalDoc, index, FOURBYSIXL_WIDTH, FOURBYSIXL_HEIGHT, "4x6", false, 0, 0);
+
+        index+=1;
+    }
+
+    return true;
+}
+
+function MakeChampionshipPortraitBadges() {
+    // Name badges
+    globalDoc = new jspdf.jsPDF({
+        orientation: 'l',
+        unit:'mm',
+        format:'a5',
+    });
+
+    // Keep track of pages and badges
+    var index = 0;
+    while (true) {
+        if (index >= (persons.length + 1)) {
+            break;
+        }
+
+        // Create a new page
+        if (index != 0) {
+            globalDoc.addPage("a5", "l");
+        }
+        
+        // Add badge
+        AddChampionshipPortraitNameBadge(globalDoc, index, false, 0, 0);
 
         index+=1;
     }
@@ -1777,34 +1590,4 @@ function MakeParticipationCertificates() {
     }
 
     return true;
-}
-
-function CreateTintedImage(img, color) {
-    var w = img.width;
-    var h = img.height;
-
-    var canvas = document.createElement("canvas");
-    canvas.width = w;
-    canvas.height = h;
-    
-    var ctx = canvas.getContext("2d");
-    ctx.drawImage( img, 0, 0 );
-    var pixels = ctx.getImageData( 0, 0, w, h ).data;
-
-    var to = ctx.getImageData( 0, 0, w, h );
-    var toData = to.data;
-
-    for (var i = 0, len = pixels.length; i < len; i += 4) {
-        toData[i  ] = pixels[i  ] * (color[0] / 255.0);
-        toData[i+1] = pixels[i+1] * (color[1] / 255.0);
-        toData[i+2] = pixels[i+2] * (color[2] / 255.0);
-        toData[i+3] = pixels[i+3];
-    }
-    
-    ctx.putImageData(to, 0, 0 );
-    
-    var imgComp = new Image();
-    imgComp.src = canvas.toDataURL();
-        
-    return imgComp;
 }

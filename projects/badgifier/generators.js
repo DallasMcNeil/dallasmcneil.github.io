@@ -891,11 +891,11 @@ function AddChampionshipPortraitNameBadge(doc, index) {
         // Place name, starting from bottom and adding extra lines on top for longer names
         if (!info.blank) {
             var textLines = SplitNameOntoTwoLines(doc, info.name, 15);
-            DrawName(doc, textLines[0], "center", 5, 103, A6P_WIDTH - 10, 13)
-            DrawName(doc, textLines[1], "center", 5, 113, A6P_WIDTH - 10, 13)
+            DrawName(doc, textLines[0], "center", 5, 102, A6P_WIDTH - 10, 13)
+            DrawName(doc, textLines[1], "center", 5, 112, A6P_WIDTH - 10, 13)
         }
 
-        doc.setLineWidth(0.4);
+        doc.setLineWidth(0.25);
         doc.setDrawColor(0,0,0);
         doc.line(8, 115, A6P_WIDTH - 8, 115);
 
@@ -905,8 +905,14 @@ function AddChampionshipPortraitNameBadge(doc, index) {
         
         if (!info.blank) {
             var nameText = info.wcaid;
-            if (info.wcaid == null) {
+            if (info.role == "delegate" || info.role == "trainee-delegate") {
                 doc.setTextColor(196,0,0);
+                nameText = "DELEGATE"
+            } else if (info.role == "organizer") {
+                doc.setTextColor(0,160,0);
+                nameText = "ORGANIZER"
+            } else if (info.wcaid == null) {
+                doc.setTextColor(0,0,196);
                 nameText = "NEWCOMER"
             }
             if (settings.includeCompetitorId) {

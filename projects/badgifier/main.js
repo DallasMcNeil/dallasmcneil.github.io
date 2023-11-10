@@ -97,6 +97,13 @@ var templates = [
         isCertificate: true,
         newcomersFirst: false,
     },
+    {
+        name: "Newcomer Certificates",
+        description: "Landscape certificates for fastest newcomer",
+        generationFunction: MakeNewcomerCertificates,
+        isCertificate: true,
+        newcomersFirst: false,
+    },
 ]
 
 // Settings

@@ -989,7 +989,7 @@ function AddChampionshipPortraitNameBadge(doc, index) {
 }
 
 // Draw a standard certificate for podium winners
-function AddCertificate(doc, eventIndex, place, dateText, tintedImage) {
+function AddCertificate(doc, eventIndex, place, dateText, tintedImage, otherEventText="") {
 
     // Get event specific text
     var eventText = "";
@@ -1003,6 +1003,10 @@ function AddCertificate(doc, eventIndex, place, dateText, tintedImage) {
         if (wcif.events[eventIndex].id == "333fm") {
             resultPrefixText = fewestMovesFormatText;
         }
+    }
+
+    if (otherEventText != "") {
+        eventText = otherEventText;
     }
 
     // Determine place specific text
@@ -1492,6 +1496,40 @@ function MakeCertificates() {
                 break;
             }
         }
+    }
+
+    return true;
+}
+
+
+function MakeNewcomerCertificates() {
+    // WCIF doesn't contain main event so assume first event (typically 3x3) is main event
+    let eventIndex = 0;
+
+    // Convert and tint background
+    globalDoc = new jspdf.jsPDF({
+        orientation: 'l',
+        unit:'mm',
+        format:'a4',
+    });
+
+    // Create tinted image
+    var tintedImage = CreateTintedImage($("#certificate-img")[0], HexToRgb(settings.certBackgroundTint));
+    tintedImage.width = $("#certificate-img").width();
+    tintedImage.height = $("#certificate-img").height();
+
+    // Get date text
+    var certDate = moment(wcif.schedule.startDate).add(wcif.schedule.numberOfDays-1, 'days')
+    certDate = certDate.format("D MMMM Y")
+
+    // Create first, second and third certificates for events
+    for (var p=2; p>=0; p--) {    
+        // Create a new page
+        if (p != 2) {
+            globalDoc.addPage("a4", "l");
+        }
+
+        AddCertificate(globalDoc, eventIndex, p, certDate, tintedImage, eventMap[wcif.events[eventIndex].id] + " Newcomer");
     }
 
     return true;

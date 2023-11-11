@@ -154,8 +154,14 @@ title: Badgifier
                         <div class="form-check">
                             <input checked class="form-check-input" type="checkbox" id="includeQRCode" onclick="settings.showWcaLiveQrCode = this.checked">
                             <label class="form-check-label" for="includeQRCode">
-                                Include WCA Live QR code with schedules
+                                Include QR code with schedules
                             </label>
+                        </div>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text">Link for QR Code</span>
+                            </div>
+                            <input type="text" class="form-control" placeholder="Link" value="https://live.worldcubeassociation.org/" onchange="settings.qrcodeLink = this.value" onblur="UpdateQRCode()">
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="colorFromStage" onclick="settings.colorFromStage = this.checked">
@@ -243,7 +249,7 @@ title: Badgifier
                 </div>
             </div>
 
-            <p>Version 2.9.1</p>
+            <p>Version 2.10.0</p>
             <p>Contributors</p>
             <ul>
                 <li>Dallas McNeil</li>
@@ -256,7 +262,8 @@ title: Badgifier
                 <img style="display: none;" id="wca-large-img" src="./images/wca-large.png"/>
                 <img style="display: none;" id="badge-img" src="./images/a7-placeholder.png"/>
                 <img style="display: none;" id="certificate-img" src="./images/cert-border.png"/>
-                <img style="display: none;" id="wca-live-qrcode-img" src="./images/wca-live-qrcode.png"/>
+                <img style="display: none;" id="qrcode-img" src="./images/wca-live-qrcode.png"/>
+                <img style="display: none;" id="qrcode-gen">
             </div>
         </div>
     </div>
@@ -267,6 +274,7 @@ title: Badgifier
 <script src="./lib/moment.js"></script>
 <script src="./lib/moment.tz.js"></script>
 <script src="./lib/PDFjs.umd.min.js"></script>
+<script src="./lib/qrcode.min.js"></script>
 <script src="./lib/bootstrap-colorpicker.min.js"></script>
 
 <script src="./lib/NotoSans-Regular-normal.js"></script>

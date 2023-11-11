@@ -122,6 +122,7 @@ var settings = {
     customScheduleColors: false,
     customScheduleColorsCode: "",
     colorFromStage: false,
+    qrcodeLink: "https://live.worldcubeassociation.org/",
     // Certificate settings
     certOrganiser: "Name",
     certRole: "WCA DELEGATE",
@@ -330,9 +331,16 @@ function UseCustomColorChanged() {
     }
 }
 
+var qrcode
+function UpdateQRCode() {
+    qrcode.makeCode(settings.qrcodeLink);
+}
+
 function PreviewDocument() {
     SetStatus("Generating PDF...", STATUS_MODE_INFO);
     settings.customScheduleColorsCode = $("#customColorsCode").val();
+    let imgsrc = document.getElementById("qrcode-gen").children[1].src;
+    document.getElementById("qrcode-img").src = imgsrc;
     setTimeout(() => {
         try {
             var error = !MakeDocument(true);
@@ -358,6 +366,8 @@ function PreviewDocument() {
 function GenerateDocument() {
     SetStatus("Generating PDF...", STATUS_MODE_INFO);
     settings.customScheduleColorsCode = $("#customColorsCode").val();
+    let imgsrc = document.getElementById("qrcode-gen").children[1].src;
+    document.getElementById("qrcode-img").src = imgsrc;
     setTimeout(() => {
         try {
             var error = !MakeDocument();
@@ -436,5 +446,14 @@ if (event == "333mbf" || event == "444bf" || event == "555bf") {
 } else {
     color = "#B0FFB0" // Odd groups, green
 }`);
+
+    qrcode = new QRCode("qrcode-gen", {
+        text: settings.qrcodeLink,
+        width: 512,
+        height: 512,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.M
+    });
 
 });

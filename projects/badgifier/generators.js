@@ -720,7 +720,7 @@ function AddPortraitNameBadgeWithDimensions(doc, index, badgeWidth, badgeHeight,
         // WCA Live QR code is assumed to be square
         // We don't draw it if the schedule extended down too far
         if (settings.showWcaLiveQrCode && (height+10) < badgeHeight - 20) {
-            doc.addImage($("#wca-live-qrcode-img")[0], "PNG", halfWidth - 18, badgeHeight - 18, 15, 15, "wca-live-qrcode", "SLOW");
+            doc.addImage($("#qrcode-img")[0], "PNG", halfWidth - 18, badgeHeight - 18, 15, 15, "qrcode", "SLOW");
             doc.setFontSize(8);
             doc.setFont("NotoSans-Regular")
             var wcaLiveLines = doc.splitTextToSize("Live results and full schedule available on WCA Live -", halfWidth - 30);
@@ -851,7 +851,7 @@ function AddLandscapeNameBadgeWithDimensions(doc, index, badgeWidth, badgeHeight
         // WCA Live QR code is assumed to be square
         // We don't draw it if the schedule extended down too far
         if (settings.showWcaLiveQrCode && (height+10) < badgeHeight - 20) {
-            doc.addImage($("#wca-live-qrcode-img")[0], "PNG", halfWidth - 18, badgeHeight - 18, 15, 15, "wca-live-qrcode", "SLOW");
+            doc.addImage($("#qrcode-img")[0], "PNG", halfWidth - 18, badgeHeight - 18, 15, 15, "qrcode", "SLOW");
             doc.setFontSize(8);
             doc.setFont("NotoSans-Regular")
             var wcaLiveLines = doc.splitTextToSize("Live results and full schedule available on WCA Live -", halfWidth - 30);
@@ -968,7 +968,7 @@ function AddChampionshipPortraitNameBadge(doc, index) {
         // WCA Live QR code is assumed to be square
         // We don't draw it if the schedule extended down too far
         if (settings.showWcaLiveQrCode && (height+10) < A6P_HEIGHT - 30) {
-            doc.addImage($("#wca-live-qrcode-img")[0], "PNG", A6P_WIDTH - 25, A6P_HEIGHT - 25, 20, 20, "wca-live-qrcode", "SLOW");
+            doc.addImage($("#qrcode-img")[0], "PNG", A6P_WIDTH - 25, A6P_HEIGHT - 25, 20, 20, "qrcode", "SLOW");
             doc.setFontSize(11);
             doc.setFont("NotoSans-Regular")
             var wcaLiveLines = doc.splitTextToSize("Live results and full schedule available on WCA Live -", A6P_WIDTH - 40);

@@ -23,7 +23,31 @@ title: Badgifier
             <div class="card">
                 <div class="card-body">
                     <h4 class="card-title">Competition Data</h4>
-                    <p><strong>Provide information about the competition</strong></p>
+                    <p><strong>Provide information about the competition.</strong></p>
+                    <p>
+                        You should generate groups first with a tool like <a href="https://groupifier.jonatanklosko.com/">Groupifier</a>.
+                    </p>
+                    <p id="wcif-status" class="info">No competition data provided yet</p>
+                    <p>
+                        Please choose one of the three options below.
+                    </p>
+                    <hr>
+                    <h5>Fetch WCIF</h3>
+                    <p>
+                        Fetch the latest WCIF from the WCA site, just provide the competition ID.
+                    </p>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                        <span class="input-group-text">Competition ID</span>
+                        </div>
+                        <input id="wcif-compid" type="text" class="form-control" placeholder="ID (e.g SouthAustralianOpen2022)" value="">
+                    </div>
+                    <button class="btn btn-secondary" onclick="FetchWCIF()">Fetch WCIF</button>
+                    <hr>
+                    <h5>Upload WCIF</h3>
+                    <p>
+                        Upload a WCIF file from your computer.
+                    </p>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
                           <span class="input-group-text">Upload WCIF</span>
@@ -33,11 +57,10 @@ title: Badgifier
                           <label class="custom-file-label" id="wcifFileLabel" for="wcifFile">Choose file...</label>
                         </div>
                     </div>
+                    <hr>
+                    <h5>Demo WCIF</h3>
                     <p>
-                        You should use <a link="https://groupifier.jonatanklosko.com/">Groupifier</a> to generate groups first. 
-                    </p>
-                    <p>
-                        Get your WCIF file from <code>https://www.worldcubeassociation.org/api/v0/competitions/YourCompetitionID/wcif/public</code> Replace <code>YourCompetitionID</code> with your competition's name (e.g SouthAustralianOpen2022)
+                        Use a demo WCIF file and see what Badgifier can do!
                     </p>
                     <button class="btn btn-secondary" onclick="UseDemoWCIF()">Use Example WCIF</button>
                 </div>
@@ -162,6 +185,12 @@ title: Badgifier
                             <span class="input-group-text">Link for QR Code</span>
                             </div>
                             <input type="text" class="form-control" placeholder="Link" value="https://live.worldcubeassociation.org/" onchange="settings.qrcodeLink = this.value" onblur="UpdateQRCode()">
+                        </div>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text">QR Code Message</span>
+                            </div>
+                            <input type="text" class="form-control" placeholder="Message" value= "Live results and full schedule available on WCA Live. Good luck and have fun!" onchange="settings.qrcodeMessage = this.value">
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="colorFromStage" onclick="settings.colorFromStage = this.checked">

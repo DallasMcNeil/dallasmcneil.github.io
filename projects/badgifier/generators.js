@@ -675,12 +675,14 @@ function AddPortraitNameBadgeWithDimensions(doc, index, badgeWidth, badgeHeight,
         }
         doc.setTextColor(0,0,0);
 
+        let logoHeight = Math.min(10, halfWidth/7);
+
         // Add logos
         var wcaRatio = $("#wca-img").width() / $("#wca-img").height();
-        doc.addImage($("#wca-img")[0], "PNG", 3, badgeHeight - 13, 10 * wcaRatio, 10, "wca", "SLOW");
+        doc.addImage($("#wca-img")[0], "PNG", 3, badgeHeight - (logoHeight+3), logoHeight * wcaRatio, logoHeight, "wca", "SLOW");
 
         var orgRatio = $("#org-img").width() / $("#org-img").height();
-        doc.addImage($("#org-img")[0], "PNG", halfWidth - (10 * orgRatio) - 3, badgeHeight - 13, 10 * orgRatio, 10, "org", "SLOW");
+        doc.addImage($("#org-img")[0], "PNG", halfWidth - (logoHeight * orgRatio) - 3, badgeHeight - (logoHeight+3), logoHeight * orgRatio, logoHeight, "org", "SLOW");
 
         // Add country flag
         if (!info.blank) {
@@ -723,10 +725,11 @@ function AddPortraitNameBadgeWithDimensions(doc, index, badgeWidth, badgeHeight,
             doc.addImage($("#qrcode-img")[0], "PNG", halfWidth - 18, badgeHeight - 18, 15, 15, "qrcode", "SLOW");
             doc.setFontSize(8);
             doc.setFont("NotoSans-Regular")
-            var wcaLiveLines = doc.splitTextToSize("Live results and full schedule available on WCA Live -", halfWidth - 30);
-            wcaLiveLines.push("Good luck and have fun!")
+            var wcaLiveLines = doc.splitTextToSize(settings.qrcodeMessage, halfWidth - 25);
+            var textHeight = wcaLiveLines.length*4;
+            var textStart = badgeHeight - 15 + ((15 - textHeight) / 2);
             for (var i=0; i<wcaLiveLines.length; i++) {
-                doc.text(wcaLiveLines[i], halfWidth - 20, badgeHeight - 13.5 + (i*4), {
+                doc.text(wcaLiveLines[i], halfWidth - 20, textStart + (i*4), {
                     align:"right",
                 });
             }    
@@ -854,10 +857,11 @@ function AddLandscapeNameBadgeWithDimensions(doc, index, badgeWidth, badgeHeight
             doc.addImage($("#qrcode-img")[0], "PNG", halfWidth - 18, badgeHeight - 18, 15, 15, "qrcode", "SLOW");
             doc.setFontSize(8);
             doc.setFont("NotoSans-Regular")
-            var wcaLiveLines = doc.splitTextToSize("Live results and full schedule available on WCA Live -", halfWidth - 30);
-            wcaLiveLines.push("Good luck and have fun!")
+            var wcaLiveLines = doc.splitTextToSize(settings.qrcodeMessage, halfWidth - 25);
+            var textHeight = wcaLiveLines.length*4;
+            var textStart = badgeHeight - 15 + ((15 - textHeight) / 2);
             for (var i=0; i<wcaLiveLines.length; i++) {
-                doc.text(wcaLiveLines[i], halfWidth - 20, badgeHeight - 13.5 + (i*4), {
+                doc.text(wcaLiveLines[i], halfWidth - 20, textStart + (i*4), {
                     align:"right",
                 });
             }    
@@ -969,12 +973,13 @@ function AddChampionshipPortraitNameBadge(doc, index) {
         // We don't draw it if the schedule extended down too far
         if (settings.showWcaLiveQrCode && (height+10) < A6P_HEIGHT - 30) {
             doc.addImage($("#qrcode-img")[0], "PNG", A6P_WIDTH - 25, A6P_HEIGHT - 25, 20, 20, "qrcode", "SLOW");
-            doc.setFontSize(11);
+            doc.setFontSize(13);
             doc.setFont("NotoSans-Regular")
-            var wcaLiveLines = doc.splitTextToSize("Live results and full schedule available on WCA Live -", A6P_WIDTH - 40);
-            wcaLiveLines.push("Good luck and have fun!")
+            var wcaLiveLines = doc.splitTextToSize(settings.qrcodeMessage, A6P_WIDTH - 35);
+            var textHeight = wcaLiveLines.length*6;
+            var textStart = A6P_HEIGHT - 20 + ((20 - textHeight) / 2);
             for (var i=0; i<wcaLiveLines.length; i++) {
-                doc.text(wcaLiveLines[i], A6P_WIDTH - 28, A6P_HEIGHT - 19 + (i*6), {
+                doc.text(wcaLiveLines[i], A6P_WIDTH - 28, textStart + (i*6), {
                     align:"right",
                 });
             }    
@@ -1381,7 +1386,6 @@ function MakeFourBySixPortraitBadges() {
         format: [152.4, 101.6],
     });
 
-    console.log("in it to win it")
     // Keep track of pages and badges
     var index = 0;
     while (true) {
@@ -1425,6 +1429,59 @@ function MakeFourBySixLandscapeBadges() {
         
         // Add badge
         AddLandscapeNameBadgeWithDimensions(globalDoc, index, FOURBYSIXL_WIDTH, FOURBYSIXL_HEIGHT, "4x6", false, 0, 0);
+
+        index+=1;
+    }
+
+    return true;
+}
+
+function MakeLetterSmallPortraitBadges() {
+    const WIDTH = 57.15*2; // 2.25 inches * 2 sides
+    const HEIGHT = 88.9; // 3.5 inches
+    const MARGIN_WIDTH = (LETTERL_WIDTH - (WIDTH*2)) / 2;
+    const MARGIN_HEIGHT = (LETTERL_HEIGHT - (HEIGHT*2)) / 2;
+
+    // Name badges
+    globalDoc = new jspdf.jsPDF({
+        orientation: 'l',
+        unit:'mm',
+        format:'letter',
+    });
+
+    // Keep track of pages and badges
+    var index = 0;
+    while (true) {
+        if (index >= (persons.length + 1)) {
+            globalDoc.saveGraphicsState();
+            globalDoc.setLineWidth(0.25);
+            globalDoc.setLineDash([1]);
+            globalDoc.setDrawColor(128, 128, 128);
+            globalDoc.line(LETTERL_WIDTH / 2, 0, LETTERL_WIDTH / 2, LETTERL_HEIGHT);
+            globalDoc.line(0, LETTERL_HEIGHT / 2, LETTERL_WIDTH, LETTERL_HEIGHT / 2);
+            globalDoc.restoreGraphicsState();
+            break;
+        }
+
+        // Create a new page
+        if (index != 0 && (index%4) == 0) {
+            globalDoc.saveGraphicsState();
+            globalDoc.setLineWidth(0.25);
+            globalDoc.setLineDash([1]);
+            globalDoc.setDrawColor(128, 128, 128);
+            globalDoc.line(LETTERL_WIDTH / 2, 0, LETTERL_WIDTH / 2, LETTERL_HEIGHT);
+            globalDoc.line(0, LETTERL_HEIGHT / 2, LETTERL_WIDTH, LETTERL_HEIGHT / 2);
+            globalDoc.restoreGraphicsState();
+            globalDoc.addPage("letter", "l");
+        }
+        
+        globalDoc.saveGraphicsState();
+
+        // Add badge
+        // Translate badge to different spot
+        AddPortraitNameBadgeWithDimensions(globalDoc, index, WIDTH, HEIGHT, MARGIN_WIDTH + (index & 0x1) * WIDTH, -MARGIN_HEIGHT + (index & 0x2) * -HEIGHT/2);
+
+        globalDoc.restoreGraphicsState();
 
         index+=1;
     }

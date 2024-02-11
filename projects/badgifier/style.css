@@ -24,19 +24,19 @@
     padding: 0mm 0mm 0mm 0mm;
 }
 
-#status {
+#status, #wcif-status {
     font-size: 20px;
 }
 
-#status.info {
+#status.info, #wcif-status.info {
     color: #00c0ff;
 }
 
-#status.warn {
+#status.warn, #wcif-status.warn {
     color: #ffd500;
 }
 
-#status.error {
+#status.error, #wcif-status.error {
     color: #ff0000;
 }
 

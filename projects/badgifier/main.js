@@ -73,6 +73,15 @@ var templates = [
         imageDescription: "Background images should be 1/4th portrait letter size (69.85mm x 107.95mm) or 825px x 1275px is recommended. The top 765px is available for your competitions logo. The bottom 41mm (485px) is reserved for badge content and this part of your image should be very simple or blank. PNG or JPEG image formats are recommended.",
     },
     {
+        name: "Small Letter Portrait 2x2",
+        description: "4x 3.5\"x2.25\" portrait badges and schedules for printing on US Letter paper",
+        generationFunction: MakeLetterSmallPortraitBadges,
+        isCertificate: false,
+        newcomersFirst: true,
+        placeholderImage: "images/letterp-placeholder.png",
+        imageDescription: ".",
+    },
+    {
         name: "A5 Championship Portrait",
         description: "Individual A6 portrait badges and schedule for printing on A5 pages, designed for championship events",
         generationFunction: MakeChampionshipPortraitBadges,
@@ -123,6 +132,7 @@ var settings = {
     customScheduleColorsCode: "",
     colorFromStage: false,
     qrcodeLink: "https://live.worldcubeassociation.org/",
+    qrcodeMessage: "Live results and full schedule available on WCA Live. Good luck and have fun!",
     // Certificate settings
     certOrganiser: "Name",
     certRole: "WCA DELEGATE",
@@ -148,6 +158,17 @@ function SetStatus(text, mode) {
     }
 }
 
+function SetWCIFStatus(text, mode) {
+    $("#wcif-status").removeClass();
+    $("#wcif-status").text(text);
+    if (mode == STATUS_MODE_WARN) {
+        $("#wcif-status").addClass("warn");
+    } else if (mode == STATUS_MODE_ERROR) {
+        $("#wcif-status").addClass("error");
+    } else {
+        $("#wcif-status").addClass("info");
+    }
+}
 var activities;
 var wcif;
 function GetActivities() {
@@ -224,24 +245,49 @@ function ReadWCIF(input) {
             GetActivities();
             LoadCountryFlags();
         } catch {
-            SetStatus("Invalid WCIF file provided: Couldn't parse JSON", STATUS_MODE_ERROR);
+            SetWCIFStatus("Invalid WCIF file provided: Couldn't parse JSON", STATUS_MODE_ERROR);
             return;
         }
         if (wcif == undefined) {
-            SetStatus("Invalid WCIF file provided: Couldn't parse JSON", STATUS_MODE_ERROR);
+            SetWCIFStatus("Invalid WCIF file provided: Couldn't parse JSON", STATUS_MODE_ERROR);
             return;
         }
 
-        SetStatus("Loaded WCIF file", STATUS_MODE_INFO);
+        SetWCIFStatus("Loaded WCIF file", STATUS_MODE_INFO);
     }; 
     fileReader.onerror = function() {
-        SetStatus("Couldn't read WCIF file", STATUS_MODE_ERROR);
+        SetWCIFStatus("Couldn't read WCIF file", STATUS_MODE_ERROR);
     }; 
+}
+
+function FetchWCIF() {
+    SetWCIFStatus("Fetching WCIF...", STATUS_MODE_INFO);
+    setTimeout(() => {
+        let id = $("#wcif-compid")[0].value;
+        let url = `https://www.worldcubeassociation.org/api/v0/competitions/${id}/wcif/public`;
+        let request = new XMLHttpRequest();
+        request.open('GET', url, false);
+        request.send();
+
+        if (request.status === 200) {
+            try {
+                wcif = JSON.parse(request.response);
+                SetWCIFStatus("Loaded WCIF", STATUS_MODE_INFO);
+                GetActivities();
+                LoadCountryFlags();
+            } catch (error) {
+                console.error(error)
+                SetWCIFStatus("Invalid WCIF ", STATUS_MODE_ERROR);
+            }
+        } else {
+            SetWCIFStatus("Loaded demo WCIF file", STATUS_MODE_ERROR);
+        }
+    }, 100);
 }
 
 function UseDemoWCIF() {
     wcif = demoWcif;
-    $("#wcifFileLabel").text("SouthAustralianOpen2022.json");
+    SetWCIFStatus("Loaded demo WCIF", STATUS_MODE_INFO);
     GetActivities();
     LoadCountryFlags();
 }

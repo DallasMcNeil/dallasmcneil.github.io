@@ -79,7 +79,7 @@ var templates = [
         isCertificate: false,
         newcomersFirst: true,
         placeholderImage: "images/letterp-placeholder.png",
-        imageDescription: ".",
+        imageDescription: "Background images should be 57.15mm x 88.9mm or 675px x 1050px is recommended. The top 350px is available for your competitions logo. The bottom 325px is reserved for badge content and this part of your image should be very simple or blank. PNG or JPEG image formats are recommended.",
     },
     {
         name: "A5 Championship Portrait",

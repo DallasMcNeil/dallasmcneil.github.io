@@ -1457,8 +1457,16 @@ function MakeLetterSmallPortraitBadges() {
             globalDoc.setLineWidth(0.25);
             globalDoc.setLineDash([1]);
             globalDoc.setDrawColor(128, 128, 128);
-            globalDoc.line(LETTERL_WIDTH / 2, 0, LETTERL_WIDTH / 2, LETTERL_HEIGHT);
-            globalDoc.line(0, LETTERL_HEIGHT / 2, LETTERL_WIDTH, LETTERL_HEIGHT / 2);
+            let top = MARGIN_HEIGHT;
+            let bottom = LETTERL_HEIGHT - MARGIN_HEIGHT;
+            let left = MARGIN_WIDTH;
+            let right = LETTERL_WIDTH - MARGIN_WIDTH
+            globalDoc.line(LETTERL_WIDTH / 2, top, LETTERL_WIDTH / 2, bottom);
+            globalDoc.line(left, LETTERL_HEIGHT / 2, right, LETTERL_HEIGHT / 2);
+            globalDoc.line(left, top, right, top);
+            globalDoc.line(left, bottom, right, bottom);
+            globalDoc.line(left, top, left, bottom);
+            globalDoc.line(right, top, right, bottom);
             globalDoc.restoreGraphicsState();
             break;
         }
@@ -1469,8 +1477,16 @@ function MakeLetterSmallPortraitBadges() {
             globalDoc.setLineWidth(0.25);
             globalDoc.setLineDash([1]);
             globalDoc.setDrawColor(128, 128, 128);
-            globalDoc.line(LETTERL_WIDTH / 2, 0, LETTERL_WIDTH / 2, LETTERL_HEIGHT);
-            globalDoc.line(0, LETTERL_HEIGHT / 2, LETTERL_WIDTH, LETTERL_HEIGHT / 2);
+            let top = MARGIN_HEIGHT;
+            let bottom = LETTERL_HEIGHT - MARGIN_HEIGHT;
+            let left = MARGIN_WIDTH;
+            let right = LETTERL_WIDTH - MARGIN_WIDTH
+            globalDoc.line(LETTERL_WIDTH / 2, top, LETTERL_WIDTH / 2, bottom);
+            globalDoc.line(left, LETTERL_HEIGHT / 2, right, LETTERL_HEIGHT / 2);
+            globalDoc.line(left, top, right, top);
+            globalDoc.line(left, bottom, right, bottom);
+            globalDoc.line(left, top, left, bottom);
+            globalDoc.line(right, top, right, bottom);
             globalDoc.restoreGraphicsState();
             globalDoc.addPage("letter", "l");
         }

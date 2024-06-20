@@ -381,7 +381,7 @@ function DrawTextBox(doc, text, align, x, y, w, h, fillColor=[255,255,255], icon
     }
 
     // Draw the icon
-    if (icon != "") {
+    if (eventCharacters[icon] != undefined) {
         doc.setFont("cubing-icons")
         doc.text(eventCharacters[icon], x + xPaddingIcon, y + yPaddingIcon, {
             align:"left",

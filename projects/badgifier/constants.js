@@ -30,6 +30,7 @@ const eventMap = {
     "minx": "Megaminx",
     "pyram": "Pyraminx",
     "skewb": "Skewb",
+    "other": "Other",
 }
 
 const eventCount = 18;

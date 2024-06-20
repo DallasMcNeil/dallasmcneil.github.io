@@ -101,11 +101,15 @@ function GeneratePersonInformation(index) {
 
             // Create assignment for activity if it doesn't exist
             if (personalSchedule[day].assignments[activity.parentActivityCode] == undefined) {
+                let eventText = eventMap[event];
+                if (text == undefined) {
+                    text = "Other";
+                }
                 personalSchedule[day].assignments[activity.parentActivityCode] = {
                     timeText: `${startTime.format("HH[:]mm")} - ${endTime.format("HH[:]mm")}`,
                     sortTime: startTime.unix(),
                     eventCode: event,
-                    eventText: eventMap[event],
+                    eventText: eventText,
                     stageText: activity.roomName,
                     stageColor: activity.roomColor,
                     competing: -1,

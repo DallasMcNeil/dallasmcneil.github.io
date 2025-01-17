@@ -114,8 +114,8 @@ const eventCharacters = {
 }
 
 // Special case text for certain events
-const multiblindFormatText = "Best result:"
-const fewestMovesFormatText = "Moves:"
+const multiblindFormatText = "Best result of:"
+const fewestMovesFormatText = "Mean of:"
 
 const localizedNames = {
     AG: "Antigua and Barbuda",
